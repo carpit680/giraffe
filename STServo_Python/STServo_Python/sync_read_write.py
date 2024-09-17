@@ -1,14 +1,9 @@
 #!/usr/bin/env python
-#
-# *********     Sync Read and Sync Write Example      *********
-#
-#
-# Available STServo model on this example : All models using Protocol STS
-# This example is tested with a STServo and an URT
-#
 
+import os
 import time
 import sys, tty, termios
+
 
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
@@ -20,8 +15,9 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
-sys.path.append("..")
-from STservo_sdk import *                   # Uses STServo SDK library
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+from STservo_sdk import *                      # Uses STServo SDK library
 
 # Control table address
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys, tty, termios
 
 
@@ -13,8 +14,9 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
-sys.path.append("..")
-from STservo_sdk import *                 # Uses STServo SDK library
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+from STservo_sdk import *                      # Uses STServo SDK library
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
