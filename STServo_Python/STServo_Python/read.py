@@ -1,40 +1,25 @@
 #!/usr/bin/env python
-#
-# *********     Gen Write Example      *********
-#
-#
-# Available STServo model on this example : All models using Protocol STS
-# This example is tested with a STServo and an URT
-#
 
-import sys
-import os
+import sys, tty, termios
 
-if os.name == 'nt':
-    import msvcrt
-    def getch():
-        return msvcrt.getch().decode()
-        
-else:
-    import sys, tty, termios
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    def getch():
-        try:
-            tty.setraw(sys.stdin.fileno())
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
+
+fd = sys.stdin.fileno()
+old_settings = termios.tcgetattr(fd)
+def getch():
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
 
 sys.path.append("..")
-from STservo_sdk import *                      # Uses STServo SDK library
+from STservo_sdk import *                       # Uses STServo SDK library
 
 # Default setting
 STS_ID                      = 1                 # STServo ID : 1
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = 'COM11'    # Check which port is being used on your controller
-                                                # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+DEVICENAME                  = '/dev/ttyACM0'    # Check which port is being used on your controller
 
 # Initialize PortHandler instance
 # Set the port path
@@ -68,11 +53,12 @@ while 1:
     if getch() == chr(0x1b):
         break
     # Read STServo present position
-    sts_present_position, sts_present_speed, sts_comm_result, sts_error = packetHandler.ReadPosSpeed(STS_ID)
+    # sts_present_position, sts_present_speed, sts_comm_result, sts_error = packetHandler.ReadPosSpeed(STS_ID)
+    sts_present_current, sts_comm_result, sts_error = packetHandler.ReadCurrent(STS_ID)
     if sts_comm_result != COMM_SUCCESS:
         print(packetHandler.getTxRxResult(sts_comm_result))
     else:
-        print("[ID:%03d] PresPos:%d PresSpd:%d" % (STS_ID, sts_present_position, sts_present_speed))
+        print("[ID:%03d] PresLoad:%d" % (STS_ID, sts_present_current))
     if sts_error != 0:
         print(packetHandler.getRxPacketError(sts_error))
 

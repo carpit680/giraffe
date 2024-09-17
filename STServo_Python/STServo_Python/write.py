@@ -1,31 +1,17 @@
 #!/usr/bin/env python
-#
-# *********     Gen Write Example      *********
-#
-#
-# Available STServo model on this example : All models using Protocol STS
-# This example is tested with a STServo and an URT
-#
 
-import sys
-import os
+import sys, tty, termios
 
-if os.name == 'nt':
-    import msvcrt
-    def getch():
-        return msvcrt.getch().decode()
-        
-else:
-    import sys, tty, termios
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    def getch():
-        try:
-            tty.setraw(sys.stdin.fileno())
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
+
+fd = sys.stdin.fileno()
+old_settings = termios.tcgetattr(fd)
+def getch():
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
 
 sys.path.append("..")
 from STservo_sdk import *                 # Uses STServo SDK library
@@ -33,8 +19,7 @@ from STservo_sdk import *                 # Uses STServo SDK library
 # Default setting
 STS_ID                      = 1                 # STServo ID : 1
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = 'COM11'    # Check which port is being used on your controller
-                                                # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
+DEVICENAME                  = '/dev/ttyACM0'    # Check which port is being used on your controller
 STS_MINIMUM_POSITION_VALUE  = 0           # STServo will rotate between this value
 STS_MAXIMUM_POSITION_VALUE  = 4095
 STS_MOVING_SPEED            = 2400        # STServo moving speed
