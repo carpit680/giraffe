@@ -54,13 +54,12 @@ while 1:
     print("Press any key to continue! (or press ESC to quit!)")
     if getch() == chr(0x1b):
         break
-    # Read STServo present position
-    # sts_present_position, sts_present_speed, sts_comm_result, sts_error = packetHandler.ReadPosSpeed(STS_ID)
-    sts_present_current, sts_comm_result, sts_error = packetHandler.ReadCurrent(STS_ID)
+    # Read STServo present position and speed
+    sts_present_position, sts_present_speed, sts_comm_result, sts_error = packetHandler.ReadPosSpeed(STS_ID)
     if sts_comm_result != COMM_SUCCESS:
         print(packetHandler.getTxRxResult(sts_comm_result))
     else:
-        print("[ID:%03d] PresLoad:%d" % (STS_ID, sts_present_current))
+        print("[ID:%03d] PresPos:%d PresSpd:%d" % (STS_ID, sts_present_position, sts_present_speed))
     if sts_error != 0:
         print(packetHandler.getRxPacketError(sts_error))
 
