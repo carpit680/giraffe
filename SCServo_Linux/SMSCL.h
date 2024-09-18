@@ -1,8 +1,8 @@
 /*
  * SMSCL.h
- * SMSCLϵ�д��ж���ӿ�
- * ����: 2020.6.17
- * ����: 
+ * SMSCL series servo motor interface
+ * Date: 2020.6.17
+ * Author:
  */
 
 #ifndef _SMSCL_H
@@ -18,7 +18,6 @@
 #define	SMSCL_57600	6
 #define	SMSCL_38400	7
 
-//�ڴ������
 //-------EPROM(ֻ��)--------
 #define SMSCL_VERSION_L 3
 #define SMSCL_VERSION_H 4

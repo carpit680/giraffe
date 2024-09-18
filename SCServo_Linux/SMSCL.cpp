@@ -1,8 +1,8 @@
 /*
- * SMSCL.cpp
- * SMSCLϵ�д��ж���ӿ�
- * ����: 2020.6.17
- * ����: 
+ * SMSCL.h
+ * SMSCL series servo motor interface
+ * Date: 2020.6.17
+ * Author:
  */
 
 #include "SMSCL.h"

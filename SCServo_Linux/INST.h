@@ -1,8 +1,8 @@
 /*
  * INST.h
- * 串行舵机协议指令定义
- * 日期: 2021.12.8
- * 作者: 
+ * Serial Servo Protocol Instruction Definitions
+ * Date: 2021.12.8
+ * Author:
  */
 
 #ifndef _INST_H

@@ -1,9 +1,10 @@
 ﻿/*
  * SCS.cpp
- * 飞特串行舵机通信层协议程序
- * 日期: 2022.3.29
- * 作者: 
+ * Feetech Serial Servo Communication Layer Protocol Program
+ * Date: 2022.3.29
+ * Author:
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -11,7 +12,7 @@
 
 SCS::SCS()
 {
-	Level = 1;//除广播指令所有指令返回应答
+	Level = 1; // All instructions, except for broadcast instructions, return a response
 	Error = 0;
 }
 
@@ -29,8 +30,8 @@ SCS::SCS(u8 End, u8 Level)
 	Error = 0;
 }
 
-//1个16位数拆分为2个8位数
-//DataL为低位，DataH为高位
+// Split a 16-bit number into two 8-bit numbers
+// DataL is the low byte, DataH is the high byte
 void SCS::Host2SCS(u8 *DataL, u8* DataH, u16 Data)
 {
 	if(End){
@@ -42,8 +43,8 @@ void SCS::Host2SCS(u8 *DataL, u8* DataH, u16 Data)
 	}
 }
 
-//2个8位数组合为1个16位数
-//DataL为低位，DataH为高位
+// Combine two 8-bit numbers into a 16-bit number
+// DataL is the low byte, DataH is the high byte
 u16 SCS::SCS2Host(u8 DataL, u8 DataH)
 {
 	u16 Data;
@@ -89,8 +90,8 @@ void SCS::writeBuf(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen, u8 Fun)
 	writeSCS(~CheckSum);
 }
 
-//普通写指令
-//舵机ID，MemAddr内存表地址，写入数据，写入长度
+// Standard write instruction
+// Servo ID, MemAddr (memory table address), data to write, length of data
 int SCS::genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	rFlushSCS();
@@ -99,8 +100,9 @@ int SCS::genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 	return Ack(ID);
 }
 
-//异步写指令
-//舵机ID，MemAddr内存表地址，写入数据，写入长度
+// Asynchronous write instruction
+// Servo ID, MemAddr (memory table address), data to write, length of data
+
 int SCS::regWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	rFlushSCS();
@@ -109,8 +111,8 @@ int SCS::regWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 	return Ack(ID);
 }
 
-//异步写执行指令
-//舵机ID
+// Asynchronous write execution instruction
+// Servo ID
 int SCS::RegWriteAction(u8 ID)
 {
 	rFlushSCS();
@@ -119,8 +121,8 @@ int SCS::RegWriteAction(u8 ID)
 	return Ack(ID);
 }
 
-//同步写指令
-//舵机ID[]数组，IDN数组长度，MemAddr内存表地址，写入数据，写入长度
+// Synchronous write instruction
+// Array of Servo IDs, length of ID array, MemAddr (memory table address), data to write, length of data
 void SCS::snycWrite(u8 ID[], u8 IDN, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	rFlushSCS();
@@ -168,8 +170,8 @@ int SCS::writeWord(u8 ID, u8 MemAddr, u16 wDat)
 	return Ack(ID);
 }
 
-//读指令
-//舵机ID，MemAddr内存表地址，返回数据nData，数据长度nLen
+// Read instruction
+// Servo ID, MemAddr (memory table address), returned data nData, data length nLen
 int SCS::Read(u8 ID, u8 MemAddr, u8 *nData, u8 nLen)
 {
 	rFlushSCS();
@@ -202,7 +204,7 @@ int SCS::Read(u8 ID, u8 MemAddr, u8 *nData, u8 nLen)
 	return nLen;
 }
 
-//读1字节，超时返回-1
+// Read 1 byte, return -1 on timeout
 int SCS::readByte(u8 ID, u8 MemAddr)
 {
 	u8 bDat;
@@ -214,7 +216,7 @@ int SCS::readByte(u8 ID, u8 MemAddr)
 	}
 }
 
-//读2字节，超时返回-1
+// Read 2 bytes, return -1 on timeout
 int SCS::readWord(u8 ID, u8 MemAddr)
 {	
 	u8 nDat[2];
@@ -227,7 +229,7 @@ int SCS::readWord(u8 ID, u8 MemAddr)
 	return wDat;
 }
 
-//Ping指令，返回舵机ID，超时返回-1
+// Ping instruction, returns the servo ID, return -1 on timeouts
 int	SCS::Ping(u8 ID)
 {
 	rFlushSCS();

@@ -2,14 +2,22 @@
 
 A cost-effective, ROS2-compatible robotic manipulator designed to lower the barriers to entry for Embodied AI.
 
-## Setup Instructions:
+---
 
-* Create and setup a virtual Environment
+## Setup Instructions
 
-  ``` bash
-  cd STServo_Python
-  python3 -m venv giraffe_env
-  source giraffe_env/bin/activate
+### For Python
 
-  pip install -r requirements.txt
-  ```
+Create and setup a virtual Environment
+
+``` bash
+cd STServo_Python
+python3 -m venv giraffe_env
+source giraffe_env/bin/activate
+
+pip install -r requirements.txt
+```
+
+### For C++
+
+Refer to this [README.md](SCServo_Linux/README.md) file for Compilation Instructions and Library Descripiton.

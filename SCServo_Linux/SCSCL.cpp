@@ -1,8 +1,8 @@
 ﻿/*
  * SCSCL.cpp
- * SCSCL系列串行舵机应用层程序
- * 日期: 2020.6.17
- * 作者: 
+ * Application layer program for SCSCL series serial servos
+ * Date: 2020.6.17
+ * Author:
  */
 
 #include "SCSCL.h"

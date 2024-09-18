@@ -1,8 +1,8 @@
 ﻿/*
  * SMS_STS.cpp
- * SMS/STS系列串行舵机应用层程序
- * 日期: 2021.12.8
- * 作者: 
+ * Application layer program for SMS/STS series serial servos
+ * Date: 2021.12.8
+ * Author:
  */
 
 #include "SMS_STS.h"
