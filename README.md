@@ -20,4 +20,4 @@ pip install -r requirements.txt
 
 ### For C++
 
-Refer to this [README.md](SCServo_Linux/README.md) file for Compilation Instructions and Library Descripiton.
+Refer to this [README.md](SCServo_Linux/README.md) file for Library Descripiton and Compilation Instructions.

@@ -3,6 +3,17 @@
 
 SCSCL sc;
 
+/**
+ * @brief Example of using the SCSCL class to control a motor in PWM mode.
+ *
+ * The program takes one command line argument, the serial port name.
+ * The program will then continuously set the PWM of the motor to 500, -500, and 0.
+ *
+ * @param argc The number of arguments passed to the program.
+ * @param argv The arguments passed to the program. The first argument should be the serial port name.
+ *
+ * @return 0 if the program is successful, 1 if there is an error.
+ */
 int main(int argc, char **argv)
 {
 	if(argc<2){

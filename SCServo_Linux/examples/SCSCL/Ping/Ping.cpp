@@ -1,5 +1,5 @@
 /*
-Ping指令测试,测试总线上相应ID舵机是否就绪,广播指令只适用于总线只有一个舵机情况
+Ping command test to check if the servo with the corresponding ID on the bus is ready. The broadcast command is only applicable when there is a single servo on the bus.
 */
 
 #include <iostream>
@@ -7,6 +7,18 @@ Ping指令测试,测试总线上相应ID舵机是否就绪,广播指令只适用
 
 SCSCL sc;
 
+/**
+ * @brief Example of using the SCSCL class to control a motor.
+ *
+ * @param argc The number of arguments passed to the program.
+ * @param argv The arguments passed to the program.
+ *
+ * This example shows how to use the SCSCL class to control a motor. It
+ * initializes the motor, reads the ID of the motor, and prints the ID to
+ * the console. If the ID is not found, it prints an error message.
+ *
+ * @return 0 if the program is successful, 1 if there is an error.
+ */
 int main(int argc, char **argv)
 {
 	if(argc<2){
