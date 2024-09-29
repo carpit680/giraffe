@@ -1,2 +1,4 @@
 giraffe_env/
 */.DS_Store
+*.pyc
+STServo_Python/STservo_sdk/__pycache__/
