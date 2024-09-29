@@ -36,10 +36,11 @@ SCS class <---  SCSerial class <--- SMSCL class
 # Compilation Instructions
 
 1. ### **Generate Static Library libSCServo.a**
-   Use `cmake .` to generate the Makefile.  
-   Use `make` to compile and generate the static library `libSCServo.a`.
+   * Use `export CC=clang` and `export CXX=clang++` to set Clang as the compiler.
+   * Use `cmake .` to generate the Makefile.  
+   * Use `make` to compile and generate the static library `libSCServo.a`.
 
-2. ### **Example:**
+3. ### **Example:**
    * Navigate to `cd examples/SMS_STS/WritePos` to enter the directory.  
    * Use `cmake .` to generate the Makefile.  
    * Use `make` to compile and generate the executable file `WritePos`.  
