@@ -73,8 +73,8 @@ while 1:
         break
 
     # for sts_id in range(1, 11):
-    sts_id = 1
-    scscl_id = 2
+    sts_id = 2
+    scscl_id = 1
     # Add STServo#1~10 goal position\moving speed\moving accc value to the Syncwrite parameter storage
     sts_addparam_result = packetHandler_sts.SyncWritePosEx(sts_id, sts_goal_position[index], STS_MOVING_SPEED, STS_MOVING_ACC)
     scscl_addparam_result = packetHandler_scscl.SyncWritePos(scscl_id, scscl_goal_position[index], SCSCL_MOVING_SPEED, SCSCL_MOVING_ACC)
