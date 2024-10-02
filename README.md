@@ -1,5 +1,13 @@
 # _giraffe_
 
+``` bash
+       __             ___  ___       
+.-----|__.----.---.-.'  _.'  _.-----.
+|  _  |  |   _|  _  |   _|   _|  -__|
+|___  |__|__| |___._|__| |__| |_____|
+|_____| 
+```
+
 A cost-effective, ROS2-compatible robotic manipulator designed to lower the barriers to entry for Embodied AI.
 
 ---

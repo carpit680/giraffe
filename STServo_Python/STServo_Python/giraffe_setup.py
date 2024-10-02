@@ -4,7 +4,7 @@ import os
 import time
 import sys, tty, termios
 import serial.tools.list_ports
-
+import pyfiglet
 
 class bcolors:
     HEADER = '\033[95m'
@@ -309,4 +309,6 @@ def set_all_servo_id():
     return True
 
 if __name__ == "__main__":
+    ASCII_art_1 = pyfiglet.figlet_format('giraffe',font='cricket')
+    print(ASCII_art_1)
     main()
