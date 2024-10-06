@@ -3,6 +3,10 @@
 import os
 import sys, tty, termios
 
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+from STservo_sdk import *
+                 # Uses STServo SDK library
 
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
@@ -13,10 +17,6 @@ def getch():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
-
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(parent_dir)
-from STservo_sdk import *                   # Uses STServo SDK library
 
 # Default setting
 STS_ID                  = 1                 # STServo ID : 1
