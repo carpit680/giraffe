@@ -8,11 +8,13 @@
                             |_____| 
 ```
 
-A cost-effective, ROS2-compatible robotic manipulator designed to lower the barriers to entry for Embodied AI.
+A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-effective, ROS2-compatible, Open-Source robotic manipulator designed to lower the barriers to entry for Embodied AI.
 
 ---
 
 ## Setup Instructions
+
+> NOTE: Configurator and the rest of the high-level software stack is presently only compatible with Python.  
 
 ### For Python
 
