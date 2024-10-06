@@ -1,11 +1,13 @@
-# _giraffe_
+# _giraffe: a low-cost robotic manipulator_ 🦒
 
-``` bash
+``` text
                                    __             ___  ___       
                             .-----|__.----.---.-.'  _.'  _.-----.
                             |  _  |  |   _|  _  |   _|   _|  -__|
                             |___  |__|__| |___._|__| |__| |_____|
-                            |_____| 
+                            |_____|
+
+                               Why should fun be out of reach?
 ```
 
 A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-effective, ROS2-compatible, Open-Source robotic manipulator designed to lower the barriers to entry for Embodied AI.
