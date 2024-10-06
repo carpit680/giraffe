@@ -48,16 +48,17 @@ def menu_select():
         '5': 'Set all servo IDs',
         '6': 'Quit'
     }
+    print()
     for key, value in options.items():
         print(f'{key}) {value}')
 
-    choice = input(">> Select menu item: ")
+    choice = input("\n>> Select menu item: ")
     if choice == '':
         choice = 1
 
     if choice == '1':
         detect_servo_port()
-        print("Please reconnect Waveshare servo driver and press Enter.")
+        print(">> Please reconnect Waveshare servo driver and press Enter.")
         getch()
         time.sleep(2)
         return True
@@ -112,7 +113,7 @@ def main():
     connection_choice = input(">> Would you like to connect to default Waveshare servo driver port? (y/n): ")
     if connection_choice != 'y' and connection_choice != 'Y':
         detect_servo_port()
-        print("Please reconnect Waveshare servo driver and press Enter.")
+        print(">> Please reconnect Waveshare servo driver and press Enter.")
         getch()
         time.sleep(2)
 
@@ -124,7 +125,7 @@ def main():
     # Open port
     try:
         portHandler.openPort()
-        print(f"{bcolors.OKGREEN}Successfully opened the port! {bcolors.ENDC}")
+        print(f"{bcolors.OKGREEN}\nSuccessfully opened the port! {bcolors.ENDC}")
     except Exception as e:
         print(f"{bcolors.FAIL}Failed to open the port. \n{e} {bcolors.ENDC}")
         print(">> Press any key to terminate...")
@@ -134,9 +135,9 @@ def main():
     # Set port baudrate
     try:
         portHandler.setBaudRate(BAUDRATE)
-        print(f"{bcolors.OKGREEN}Successfully set the baudrate! \n{bcolors.ENDC}")
+        print(f"{bcolors.OKGREEN}Successfully set the baudrate! {bcolors.ENDC}")
     except Exception as e:
-        print(f"{bcolors.FAIL}Failed to set the baudrate. \n{e} {bcolors.ENDC}")
+        print(f"{bcolors.FAIL}Failed to set the baudrate. {e} {bcolors.ENDC}")
         print(">> Press any key to terminate...")
         getch()
         quit()
@@ -179,7 +180,7 @@ def detect_servo_port():
         print(f"{bcolors.FAIL}\nNo port was detected as disconnected. Please try again from the main Menu. {bcolors.ENDC}")
         return False
 
-    print(f"{bcolors.FAIL}\nDetected Waveshare servo driver on port: {servo_port} {bcolors.ENDC}")
+    print(f"{bcolors.OKGREEN}\nDetected Waveshare servo driver on port: {servo_port} {bcolors.ENDC}")
 
     global DEVICENAME
     DEVICENAME = servo_port
@@ -214,12 +215,12 @@ def set_servo_id():
         packetHandler.unLockEprom(old_id)
         print(f"Replacing ID: {old_id} -> ID: {new_id}")
         packetHandler.setID(old_id, new_id)
-        print("[ID: {new_id}] Locking Eprom.")
+        print(f"[ID: {new_id}] Locking Eprom.")
         packetHandler.LockEprom(new_id)
         sts_model_number, sts_comm_result, sts_error = packetHandler.ping(new_id)
         if sts_comm_result != COMM_SUCCESS:
             print(f"{bcolors.FAIL}[ID: {new_id}] Failed to replace ID with error: {packetHandler.getTxRxResult(sts_comm_result)} {bcolors.ENDC}")
-            print("Press any key to go back to the main menu...")
+            print(">> Press any key to go back to the main menu...")
             getch()
             return False
         else:
@@ -227,7 +228,7 @@ def set_servo_id():
 
         if sts_error != 0:
             print(f"{bcolors.FAIL}[ID: {new_id}] STS Error while pinging new ID: {packetHandler.getRxPacketError(sts_error)} {bcolors.ENDC}")
-            print("Press any key to go back to the main menu...")
+            print(">> Press any key to go back to the main menu...")
             getch()
             return False
 
@@ -252,7 +253,7 @@ def reset_servo_id():
             sts_model_number, sts_comm_result, sts_error = packetHandler.ping(1)
             if sts_comm_result != COMM_SUCCESS:
                 print(f"{bcolors.FAIL}[ID: {servo_id}] Failed to reset ID with error: {packetHandler.getTxRxResult(sts_comm_result)} {bcolors.ENDC}")
-                print("Press any key to go back to the main menu...")
+                print(">> Press any key to go back to the main menu...")
                 getch()
                 return False
             else:
@@ -260,7 +261,7 @@ def reset_servo_id():
 
             if sts_error != 0:
                 print(f"{bcolors.FAIL}[ID: {servo_id}] STS Error while pinging new ID: {packetHandler.getRxPacketError(sts_error)} {bcolors.ENDC}")
-                print("Press any key to go back to the main menu...")
+                print(">> Press any key to go back to the main menu...")
                 getch()
                 return False
 
@@ -275,7 +276,7 @@ def set_all_servo_id():
             input(">> Attach Base servo and then press Enter.")
         else:
             input(">> Attach next servo and then press Enter.")
-        
+
         sts_model_number, sts_comm_result, sts_error = packetHandler.ping(DEFAULT_ID)
         if sts_comm_result != COMM_SUCCESS:
             print(f"{bcolors.FAIL}{packetHandler.getTxRxResult(sts_comm_result)} {bcolors.ENDC}")
@@ -291,24 +292,24 @@ def set_all_servo_id():
             sts_model_number, sts_comm_result, sts_error = packetHandler.ping(new_id)
             if sts_comm_result != COMM_SUCCESS:
                 print(f"{bcolors.FAIL}[ID: {DEFAULT_ID}]Failed to replace ID with error: {packetHandler.getTxRxResult(sts_comm_result)} {bcolors.ENDC}")
-                print("Press any key to terminate...")
+                print(">> Press any key to terminate...")
                 getch()
                 quit()
             else:
                 print(f"{bcolors.OKGREEN}[ID: {new_id}] ID replacement Succeeded. STServo model number : {sts_model_number} {bcolors.ENDC}")
 
             if sts_error != 0:
-                print("STS Error while pinging new ID: %s" % packetHandler.getRxPacketError(sts_error))
+                print(f"{bcolors.FAIL}STS Error while pinging new ID: {packetHandler.getRxPacketError(sts_error)} {bcolors.ENDC}")
                 return False
 
         if sts_error != 0:
             print(f"{bcolors.FAIL}STS Error while pinging new ID: {packetHandler.getRxPacketError(sts_error)} {bcolors.ENDC}")
             return False
-    
+
     print(f"{bcolors.OKGREEN}Succeeded in setting all servo IDs.\n {bcolors.ENDC}")
     return True
 
 if __name__ == "__main__":
     ASCII_art_1 = pyfiglet.figlet_format('giraffe',font='cricket')
-    print(ASCII_art_1)
+    print(f"{bcolors.OKCYAN}\n\n\n{ASCII_art_1} {bcolors.ENDC}")
     main()
