@@ -1,37 +1,24 @@
 _target_: giraffe.common.robot_devices.robots.manipulator.ManipulatorRobot
 robot_type: giraffe
-calibration_dir: .cache/calibration/koch
+calibration_dir: .cache/calibration/giraffe
 
 # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
 # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
 # the number of motors in your follower arms.
 max_relative_target: null
 
-leader_arms:
-  main:
-    _target_: lerobot.common.robot_devices.motors.dynamixel.DynamixelMotorsBus
-    port: /dev/tty.usbmodem575E0031751
-    motors:
-      # name: (index, model)
-      shoulder_pan: [1, "xl330-m077"]
-      shoulder_lift: [2, "xl330-m077"]
-      elbow_flex: [3, "xl330-m077"]
-      wrist_flex: [4, "xl330-m077"]
-      wrist_roll: [5, "xl330-m077"]
-      gripper: [6, "xl330-m077"]
-
 follower_arms:
   main:
-    _target_: lerobot.common.robot_devices.motors.dynamixel.DynamixelMotorsBus
-    port: /dev/tty.usbmodem575E0032081
+    _target_: lerobot.common.robot_devices.motors.waveshare.WaveshareMotorsBus
+    port: /dev/tty.usbmodem585A0080511
     motors:
       # name: (index, model)
-      shoulder_pan: [1, "xl430-w250"]
-      shoulder_lift: [2, "xl430-w250"]
-      elbow_flex: [3, "xl330-m288"]
-      wrist_flex: [4, "xl330-m288"]
-      wrist_roll: [5, "xl330-m288"]
-      gripper: [6, "xl330-m288"]
+      gripper:       [1, "sc15"  ]
+      wrist_roll:    [2, "st3215"]
+      wrist_flex:     [3, "st3215"]
+      elbow_flex:     [4, "st3215"]
+      shoulder_lift: [5, "st3215"]
+      shoulder_pan:  [6, "st3215"]
 
 cameras:
   laptop:

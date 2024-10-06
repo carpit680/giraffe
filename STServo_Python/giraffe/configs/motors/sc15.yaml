@@ -1,0 +1,7 @@
+motor_type: sc15
+model: 3845
+modes: ["servo", "continuous"]
+servo_min: 0
+servo_max: 180
+baud_rate: 1000000
+encoder_resolution: 1024
