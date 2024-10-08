@@ -1,0 +1,40 @@
+_target_: giraffe.common.robot_devices.robots.manipulator.ManipulatorRobot
+robot_type: giraffe
+calibration_dir: .cache/calibration/giraffe
+
+# `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
+# Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
+# the number of motors in your follower arms.
+max_relative_target: null
+
+follower_arms:
+  main:
+    _target_: lerobot.common.robot_devices.motors.waveshare.WaveshareMotorsBus
+    port: /dev/tty.usbmodem585A0080511
+    motors:
+      # name: (index, model)
+      gripper:       [1, "sc15"  ]
+      wrist_roll:    [2, "st3215"]
+      wrist_flex:     [3, "st3215"]
+      elbow_flex:     [4, "st3215"]
+      shoulder_lift: [5, "st3215"]
+      shoulder_pan:  [6, "st3215"]
+
+cameras:
+  laptop:
+    _target_: lerobot.common.robot_devices.cameras.opencv.OpenCVCamera
+    camera_index: 0
+    fps: 30
+    width: 640
+    height: 480
+  phone:
+    _target_: lerobot.common.robot_devices.cameras.opencv.OpenCVCamera
+    camera_index: 1
+    fps: 30
+    width: 640
+    height: 480
+
+# ~ Koch specific settings ~
+# Sets the leader arm in torque mode with the gripper motor set to this angle. This makes it possible
+# to squeeze the gripper and have it spring back to an open position on its own.
+gripper_open_degree: 35.156

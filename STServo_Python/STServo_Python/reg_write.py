@@ -20,11 +20,11 @@ from STservo_sdk import *                      # Uses STServo SDK library
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = '/dev/tty.usbmodem585A0080511'    # Check which port is being used on your controller
+DEVICENAME                  = '/dev/ttyACM0'    # Check which port is being used on your controller
 STS_MINIMUM_POSITION_VALUE  = 0           # STServo will rotate between this value
-STS_MAXIMUM_POSITION_VALUE  = 1023 #4095
-STS_MOVING_SPEED            = 1500 #2400        # STServo moving speed
-STS_MOVING_ACC              = 100          # STServo moving acc
+STS_MAXIMUM_POSITION_VALUE  = 4095
+STS_MOVING_SPEED            = 2400        # STServo moving speed
+STS_MOVING_ACC              = 50          # STServo moving acc
 
 index = 0
 sts_goal_position = [STS_MINIMUM_POSITION_VALUE, STS_MAXIMUM_POSITION_VALUE]         # Goal position
@@ -36,7 +36,7 @@ portHandler = PortHandler(DEVICENAME)
 
 # Initialize PacketHandler instance
 # Get methods and members of Protocol
-packetHandler = scscl(portHandler)
+packetHandler = sts(portHandler)
     
 # Open port
 if portHandler.openPort():
@@ -62,13 +62,12 @@ while 1:
         break
 
     # Write STServo goal position/moving speed/moving acc
-    # for sts_id in range(1, 11):
-    sts_id = 1
-    sts_comm_result, sts_error = packetHandler.RegWritePos(sts_id, sts_goal_position[index], STS_MOVING_SPEED, STS_MOVING_ACC)
-    if sts_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(sts_comm_result))
-    if sts_error != 0:
-        print("%s" % packetHandler.getRxPacketError(sts_error))
+    for sts_id in range(1, 11):
+        sts_comm_result, sts_error = packetHandler.RegWritePosEx(sts_id, sts_goal_position[index], STS_MOVING_SPEED, STS_MOVING_ACC)
+        if sts_comm_result != COMM_SUCCESS:
+            print("%s" % packetHandler.getTxRxResult(sts_comm_result))
+        if sts_error != 0:
+            print("%s" % packetHandler.getRxPacketError(sts_error))
     packetHandler.RegAction()
 
     # Change goal position

@@ -1,0 +1,17 @@
+st3215:
+  model: 777
+  modes: ["servo", "continuous"]
+  pos_min: 0   # For servo mode only
+  pos_max: 360 # For servo mode only
+  max_speed: 3073
+  baud_rate: 1000000
+  encoder_resolution: 4096
+
+sc15:
+  model: 3845
+  modes: ["servo", "continuous"]
+  pos_min: 0   # For servo mode only
+  pos_max: 180 # For servo mode only
+  max_speed: 1500
+  baud_rate: 1000000
+  encoder_resolution: 1024
