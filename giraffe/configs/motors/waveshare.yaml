@@ -8,7 +8,7 @@ st3215:
   encoder_resolution: 4096
 
 sc15:
-  model: 3845
+  model: 3845 #1295 if using scscl as packetHandler
   modes: ["servo", "continuous"]
   pos_min: 0   # For servo mode only
   pos_max: 180 # For servo mode only

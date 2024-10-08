@@ -1,27 +1,39 @@
 #!/usr/bin/env python
+#
+# *********     Ping Example      *********
+#
+#
+# Available STServo model on this example : All models using Protocol STS
+# This example is tested with a STServo and an URT
+#
 
+import sys
 import os
-import sys, tty, termios
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(parent_dir)
-from STservo_sdk import *
-                 # Uses STServo SDK library
+if os.name == 'nt':
+    import msvcrt
+    def getch():
+        return msvcrt.getch().decode()
+else:
+    import sys, tty, termios
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    def getch():
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
 
-fd = sys.stdin.fileno()
-old_settings = termios.tcgetattr(fd)
-def getch():
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
+sys.path.append("..")
+from STservo_sdk import *                   # Uses STServo SDK library
 
 # Default setting
 STS_ID                  = 1                 # STServo ID : 1
 BAUDRATE                = 1000000           # STServo default baudrate : 1000000
 DEVICENAME              = '/dev/tty.usbmodem585A0080511' # '/dev/ttyACM0'    # Check which port is being used on your controller
+                                            # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 # Initialize PortHandler instance
 # Set the port path

@@ -57,8 +57,14 @@ class protocol_packet_handler(object):
 
     def sts_loword(self, l):
         return l & 0xFFFF
+    
+    def scs_loword(self, l):
+        return l & 0xFFFF
 
     def sts_hiword(self, h):
+        return (h >> 16) & 0xFFFF
+
+    def scs_hiword(self, h):
         return (h >> 16) & 0xFFFF
 
     def sts_lobyte(self, w):
