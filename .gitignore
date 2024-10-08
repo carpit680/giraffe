@@ -1,4 +1,6 @@
 giraffe_env/
 */.DS_Store
 *.pyc
-STServo_Python/STservo_sdk/__pycache__/
+STservo_sdk/__pycache__/
+STservo_sdk.egg-info/
+build/
