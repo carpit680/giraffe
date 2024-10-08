@@ -23,10 +23,10 @@ from STservo_sdk import *                      # Uses STServo SDK library
 
 # Default setting
 BAUDRATE                    = 1000000           # STServo default baudrate : 1000000
-DEVICENAME                  = '/dev/ttyACM0'    # Check which port is being used on your controller
+DEVICENAME                  = '/dev/tty.usbmodem585A0080511'    # Check which port is being used on your controller
 STS_MINIMUM_POSITION_VALUE  = 0             # SCServo will rotate between this value
-STS_MAXIMUM_POSITION_VALUE  = 4095
-STS_MOVING_SPEED            = 2400          # SCServo moving speed
+STS_MAXIMUM_POSITION_VALUE  = 1023
+STS_MOVING_SPEED            = 1000          # SCServo moving speed
 STS_MOVING_ACC              = 50            # SCServo moving acc
 
 index = 0

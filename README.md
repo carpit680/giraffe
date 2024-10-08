@@ -23,13 +23,12 @@ A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-ef
 Create and setup a virtual Environment
 
 ``` bash
-cd STServo_Python
+git clone https://github.com/carpit680/giraffe.git
+cd giraffe
+
 python3 -m venv giraffe_env
+echo "import sys; sys.path.append('$(pwd)')" >> giraffe_env/lib/$(python3 -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')/site-packages/sitecustomize.py
 source giraffe_env/bin/activate
-
 pip install -r requirements.txt
+
 ```
-
-### For C++
-
-Refer to this [README.md](SCServo_Linux/README.md) file for Library Descripiton and Compilation Instructions.

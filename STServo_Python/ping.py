@@ -19,7 +19,7 @@ def getch():
     return ch
 
 # Default setting
-STS_ID                  = 3                 # STServo ID : 1
+STS_ID                  = 1                 # STServo ID : 1
 BAUDRATE                = 1000000           # STServo default baudrate : 1000000
 DEVICENAME              = '/dev/tty.usbmodem585A0080511' # '/dev/ttyACM0'    # Check which port is being used on your controller
 
