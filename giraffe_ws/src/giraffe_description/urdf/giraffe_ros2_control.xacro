@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<robot name="giraffe" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+    <xacro:macro name="giraffe_ros2_control">
+        <gazebo>
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
+                <parameters>$(find giraffe_description)/config/giraffe_controller.yaml</parameters>
+            </plugin>
+        </gazebo>
+
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+            <joint name="base_link_shoulder_pan_joint">
+                <command_interface name="position">
+                <param name="min">-1.833</param>
+                <param name="max">1.833</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="shoulder_pan_shoulder_lift_joint">
+                <command_interface name="position">
+                <param name="min">-0.785</param>
+                <param name="max">1.644</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="shoulder_lift_elbow_joint">
+                <command_interface name="position">
+                <param name="min">-1.536</param>
+                <param name="max">1.745</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="elbow_wrist_1_joint">
+                <command_interface name="position">
+                <param name="min">-3.368</param>
+                <param name="max">0.262</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="wrist_1_wrist_2_joint">
+                <command_interface name="position">
+                <param name="min">-3.142</param>
+                <param name="max">3.142</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="wrist_2_gripper_joint">
+                <command_interface name="position">
+                <param name="min">-0.175</param>
+                <param name="max">1.571</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="effort">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+        </ros2_control>
+    </xacro:macro>
+</robot>

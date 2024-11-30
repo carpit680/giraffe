@@ -4,3 +4,6 @@ giraffe_env/
 STservo_sdk/__pycache__/
 STservo_sdk.egg-info/
 build/
+install/
+log/
+/giraffe_ws/src/.vscode
