@@ -138,13 +138,13 @@
         </inertial>
         <visual name="base_link_visual">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="white"/>
             <geometry>
                 <mesh filename="package://giraffe_description/meshes/base_link.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </visual>
         <collision name="base_link_collision">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-            <material name="white"/>
             <geometry>
                 <mesh filename="package://giraffe_description/meshes/base_link.stl" scale="0.001 0.001 0.001" />
             </geometry>

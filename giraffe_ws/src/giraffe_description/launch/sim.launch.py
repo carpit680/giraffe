@@ -59,6 +59,14 @@ def generate_launch_description():
         )
     )
 
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', os.path.join(giraffe_description, 'rviz', 'display.rviz')],
+    )
+
     spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-entity', 'giraffe',
                                    '-topic', 'robot_description',
@@ -84,6 +92,7 @@ def generate_launch_description():
         output='screen')
     return LaunchDescription([
         env_var,
+        rviz_node,
         model_arg,
         start_gazebo_server,
         # start_gazebo_client,
