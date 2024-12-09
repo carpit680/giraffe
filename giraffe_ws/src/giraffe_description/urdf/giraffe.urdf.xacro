@@ -3,6 +3,7 @@
 
     <xacro:include filename="$(find giraffe_description)/urdf/giraffe_ros2_control.xacro" />
     <xacro:giraffe_ros2_control />
+
     <material name="blue">
         <color rgba="0 0 0.8 1"/>
     </material>
