@@ -1,9 +1,0 @@
-# Default initial positions for giraffe's ros2_control fake system
-
-initial_positions:
-  base_link_shoulder_pan_joint: 0
-  elbow_wrist_1_joint: 0
-  shoulder_lift_elbow_joint: 0
-  shoulder_pan_shoulder_lift_joint: 0
-  wrist_1_wrist_2_joint: 0
-  wrist_2_gripper_joint: 0
