@@ -3,18 +3,18 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
 
-    arm_controller:
+    arm_group_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
 
-    gripper_controller:
+    gripper_group_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-arm_controller:
+arm_group_controller:
   ros__parameters:
     joints:
       - base_link_shoulder_pan_joint
@@ -27,14 +27,7 @@ arm_controller:
     state_interfaces:
       - position
       - velocity
-    state_publish_rate: 50.0
-    action_monitor_rate: 20.0
-    command_publish_rate: 50
-    allow_partial_joints_goal: false
-    hardware_state_has_offset: true
-    deduce_states_from_derivatives: true
-
-gripper_controller:
+gripper_group_controller:
   ros__parameters:
     joints:
       - wrist_2_gripper_joint
@@ -43,9 +36,3 @@ gripper_controller:
     state_interfaces:
       - position
       - velocity
-    state_publish_rate: 50.0
-    action_monitor_rate: 20.0
-    command_publish_rate: 50
-    allow_partial_joints_goal: false
-    hardware_state_has_offset: true
-    deduce_states_from_derivatives: true

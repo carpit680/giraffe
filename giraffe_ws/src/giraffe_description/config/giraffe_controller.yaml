@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 500  # Hz
+    update_rate: 1000  # Hz
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -57,6 +57,7 @@ arm_controller:
       elbow_wrist_1_joint: {p: 30.0, i: 0.0, d: 6.0, i_clamp: 0.0}
       wrist_1_wrist_2_joint: {p: 30.0, i: 0.0, d: 6.0, i_clamp: 0.0}
     state_publish_rate: 100.0
+    state_publish_topic: controller_state
     action_monitor_rate: 20.0
     allow_partial_joints_goal: false
     allow_nonzero_velocity_at_trajectory_end: false
@@ -81,7 +82,7 @@ gripper_controller:
 
     gains:
       wrist_2_gripper_joint: {p: 50.0, i: 0.0, d: 10.0, i_clamp: 0.0}
-
+    state_publish_topic: controller_state
     open_loop_control: true
     state_publish_rate: 100.0
     action_monitor_rate: 20.0

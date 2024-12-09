@@ -63,7 +63,10 @@ def generate_launch_description():
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}]
+        parameters=[
+            {'robot_description': robot_description},
+            {'use_sim_time': True}
+        ]
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -87,14 +90,6 @@ def generate_launch_description():
             os.path.join(gazebo_ros_dir, 'launch', 'gzclient.launch.py')
         )
     )
-
-    # rviz_node = Node(
-    #     package='rviz2',
-    #     executable='rviz2',
-    #     name='rviz2',
-    #     output='screen',
-    #     arguments=['-d', os.path.join(giraffe_description, 'rviz', 'display.rviz')],
-    # )
 
     spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-entity', 'giraffe',
@@ -181,7 +176,7 @@ def generate_launch_description():
         "trajectory_execution.allowed_goal_duration_margin": 0.5,
         "trajectory_execution.allowed_start_tolerance": 0.01,
     }
-    sensors_yaml = load_yaml("giraffe_moveit_config", "config/sensors_3d.yaml")
+    # sensors_yaml = load_yaml("giraffe_moveit_config", "config/sensors_3d.yaml")
     planning_scene_monitor_parameters = {
         "planning_scene_monitor": {
             "publish_planning_scene": True,
@@ -197,25 +192,24 @@ def generate_launch_description():
     robot_description_config = xacro.process_file(model_path)
     robot_description_config = robot_description_config.toxml()
     robot_description_moveit = {'robot_description': robot_description_config}
-
+    moveit_config = (
+        MoveItConfigsBuilder("giraffe")
+        .robot_description(file_path="config/giraffe.urdf.xacro")
+        .robot_description_semantic(file_path="config/giraffe.srdf")
+        .trajectory_execution(file_path="config/moveit_controllers.yaml")
+        .to_moveit_configs()
+    )
     # START NODE -> MOVE GROUP:
     run_move_group_node = Node(
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
-        # namespace="move_group",
         parameters=[
-            robot_description_moveit,
-            robot_description_semantic,
-            robot_description_kinematics,
-            ompl_planning_pipeline_config,
-            trajectory_execution,
-            moveit_controllers,
-            planning_scene_monitor_parameters,
-            robot_description_planning,
-            sensors_yaml
+            moveit_config.to_dict(),
+            {"use_sim_time": True},
         ],
     )
+
     # Delay move_group node until controllers are up
     delay_move_group_after_controllers = RegisterEventHandler(
         event_handler=OnProcessExit(
@@ -229,7 +223,6 @@ def generate_launch_description():
         )
     )
     # RVIZ:
-    load_RVIZfile = LaunchConfiguration("rviz_file")
     rviz_base = os.path.join(get_package_share_directory("giraffe_moveit_config"), "config")
     rviz_full_config = os.path.join(rviz_base, "moveit.rviz")
     rviz_node_full = Node(
@@ -242,50 +235,36 @@ def generate_launch_description():
         parameters=[
             robot_description_moveit,
             robot_description_semantic,
+            robot_description_kinematics,
             ompl_planning_pipeline_config,
             kinematics_yaml,
-        ],
-        condition=UnlessCondition(load_RVIZfile),
+        ]
     )
 
     return LaunchDescription([
         env_var,
-        # rviz_node,
         model_arg,
         start_gazebo_server,
         start_gazebo_client,
         spawn_robot,
+        rviz_node_full,
         robot_state_publisher_node,
-        # load_joint_trajectory_controller,
-        # load_gripper_controller,
+        delay_controllers_after_joint_state_broadcaster_spawner,
+        # delay_move_group_after_controllers,
         TimerAction(
             period=5.0,
             actions=[controller_manager]
         ),
-        # Delay start of joint state broadcaster
         TimerAction(
             period=10.0,
             actions=[joint_state_broadcaster_spawner]
         ),
-        # joint_state_broadcaster_spawner,
-        delay_controllers_after_joint_state_broadcaster_spawner,
-        delay_move_group_after_controllers,
+        TimerAction(
+            period=5.0,
+            actions=[run_move_group_node]
+        ),
         TimerAction(
             period=15.0,
             actions=[list_controllers]
-        ),
-        RegisterEventHandler(
-            OnProcessExit(
-                target_action = spawn_robot,
-                on_exit = [
-                    TimerAction(
-                        period=5.0,
-                        actions=[
-                            rviz_arg,
-                            rviz_node_full,
-                        ]
-                    ),
-                ]
-            )
         )
     ])

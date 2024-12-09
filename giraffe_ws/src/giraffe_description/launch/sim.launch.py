@@ -95,7 +95,7 @@ def generate_launch_description():
         rviz_node,
         model_arg,
         start_gazebo_server,
-        # start_gazebo_client,
+        start_gazebo_client,
         robot_state_publisher_node,
         spawn_robot,
         load_joint_trajectory_controller,
