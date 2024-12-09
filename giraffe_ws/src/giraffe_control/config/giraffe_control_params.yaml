@@ -1,0 +1,4 @@
+giraffe_hardware_interface:
+  ros__parameters:
+    example_param: "abc"
+
