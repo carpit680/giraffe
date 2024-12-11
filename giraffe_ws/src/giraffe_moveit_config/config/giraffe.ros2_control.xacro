@@ -1,56 +1,83 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="giraffe_ros2_control" params="name initial_positions_file">
-        <xacro:property name="initial_positions" value="${load_yaml(initial_positions_file)['initial_positions']}"/>
+<?xml version="1.0" ?>
+<robot name="giraffe" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-        <ros2_control name="${name}" type="system">
+    <xacro:macro name="giraffe_ros2_control">
+        <gazebo>
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
+                <parameters>$(find giraffe_description)/config/giraffe_controller.yaml</parameters>
+            </plugin>
+        </gazebo>
+
+        <ros2_control name="GazeboSystem" type="system">
             <hardware>
-                <!-- By default, set up controllers for simulation. This won't work on real hardware -->
-                <plugin>mock_components/GenericSystem</plugin>
+                <plugin>giraffe_control/GiraffeHardwareInterface</plugin>
             </hardware>
+            <!-- <hardware>
+                <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+                <param name="joint_commands_topic">/topic_based_joint_commands</param>
+                <param name="joint_states_topic">/topic_based_joint_states</param>
+                <param name="sum_wrapped_joint_states">true</param>
+            </hardware> -->
             <joint name="base_link_shoulder_pan_joint">
-                <command_interface name="position"/>
+                <command_interface name="position">
+                    <param name="min">-1.833</param>
+                    <param name="max">1.833</param>
+                </command_interface>
                 <state_interface name="position">
-                  <param name="initial_value">${initial_positions['base_link_shoulder_pan_joint']}</param>
+                    <param name="initial_value">0.0</param>
                 </state_interface>
-                <state_interface name="velocity"/>
-            </joint>
-            <joint name="shoulder_pan_shoulder_lift_joint">
-                <command_interface name="position"/>
-                <state_interface name="position">
-                  <param name="initial_value">${initial_positions['shoulder_pan_shoulder_lift_joint']}</param>
-                </state_interface>
-                <state_interface name="velocity"/>
-            </joint>
-            <joint name="shoulder_lift_elbow_joint">
-                <command_interface name="position"/>
-                <state_interface name="position">
-                  <param name="initial_value">${initial_positions['shoulder_lift_elbow_joint']}</param>
-                </state_interface>
-                <state_interface name="velocity"/>
-            </joint>
-            <joint name="elbow_wrist_1_joint">
-                <command_interface name="position"/>
-                <state_interface name="position">
-                  <param name="initial_value">${initial_positions['elbow_wrist_1_joint']}</param>
-                </state_interface>
-                <state_interface name="velocity"/>
-            </joint>
-            <joint name="wrist_1_wrist_2_joint">
-                <command_interface name="position"/>
-                <state_interface name="position">
-                  <param name="initial_value">${initial_positions['wrist_1_wrist_2_joint']}</param>
-                </state_interface>
-                <state_interface name="velocity"/>
-            </joint>
-            <joint name="wrist_2_gripper_joint">
-                <command_interface name="position"/>
-                <state_interface name="position">
-                  <param name="initial_value">${initial_positions['wrist_2_gripper_joint']}</param>
-                </state_interface>
-                <state_interface name="velocity"/>
             </joint>
 
+            <joint name="shoulder_pan_shoulder_lift_joint">
+                <command_interface name="position">
+                    <param name="min">-0.785</param>
+                    <param name="max">1.644</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="shoulder_lift_elbow_joint">
+                <command_interface name="position">
+                    <param name="min">-1.536</param>
+                    <param name="max">1.745</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="elbow_wrist_1_joint">
+                <command_interface name="position">
+                    <param name="min">-3.368</param>
+                    <param name="max">0.262</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="wrist_1_wrist_2_joint">
+                <command_interface name="position">
+                    <param name="min">-3.142</param>
+                    <param name="max">3.142</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+
+            <joint name="wrist_2_gripper_joint">
+                <command_interface name="position">
+                    <param name="min">-0.175</param>
+                    <param name="max">1.571</param>
+                </command_interface>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
         </ros2_control>
     </xacro:macro>
 </robot>

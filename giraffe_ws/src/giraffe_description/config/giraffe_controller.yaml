@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 1000  # Hz
+    update_rate: 50  # Hz
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -49,7 +49,6 @@ arm_controller:
       - position
     state_interfaces:
       - position
-      - velocity
     gains:
       base_link_shoulder_pan_joint: {p: 50.0, i: 0.0, d: 10.0, i_clamp: 0.0}
       shoulder_pan_shoulder_lift_joint: {p: 50.0, i: 0.0, d: 10.0, i_clamp: 0.0}
@@ -78,7 +77,6 @@ gripper_controller:
       - position
     state_interfaces:
       - position
-      - velocity
 
     gains:
       wrist_2_gripper_joint: {p: 50.0, i: 0.0, d: 10.0, i_clamp: 0.0}

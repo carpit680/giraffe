@@ -27,52 +27,39 @@ class GiraffeHardwareInterface(Node):
         self.motors_bus.connect()
 
         # ROS topics
-        # self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
+        self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
         self.joint_command_sub = self.create_subscription(
-            JointState, "/joint_states", self.joint_state_callback, 10
+            JointTrajectory, "/arm_controller/joint_trajectory", self.joint_trajectory_callback, 10
         )
 
         # Timer for publishing joint states
+        self.create_timer(0.02, self.publish_joint_states)
         self.offsets = [3.223, 3.043, 2.979, 3.152, 1.577, 4.9547]
         self.set_motor_acceleration(10)
-    
-    def joint_state_callback(self, msg: JointState):
-        """
-        Callback for processing incoming JointState messages and writing positions and velocities to servos.
-        """
-        motor_order = [
-            "base_link_shoulder_pan_joint",
-            "shoulder_pan_shoulder_lift_joint",
-            "shoulder_lift_elbow_joint",
-            "elbow_wrist_1_joint",
-            "wrist_1_wrist_2_joint",
-            "wrist_2_gripper_joint",
-        ]
 
-        positions = []
+    def publish_joint_states(self):
+        msg = JointState()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.name = list(self.motors_bus.motor_names)
 
-        homing_offsets = [-2082, -1992, -1949, -2023, -2046, -3225]
-        for motor_name, offset in zip(self.motors_bus.motor_names, homing_offsets):
-            if motor_name in msg.name:
-                idx = msg.name.index(motor_name)
-                try:
-                    # Convert position to steps
-                    radians = msg.position[idx]
-                    model = self.motors_bus.motors[motor_name][1]
-                    step_value = self.radians_to_steps(-radians, model) - offset
-                    positions.append(step_value)
+        # Read joint positions and convert to radians, with direction inversion
+        try:
+            steps = self.motors_bus.read("Present_Position")  # Read all motors at once
+            positions = []
+            self.get_logger().info(f"Published positions: {steps}")
 
+            for motor_name, step, offset in zip(msg.name, steps, self.offsets):
+                model = self.motors_bus.motors[motor_name][1]
+                radians = self.motors_bus.steps_to_radians(step, model)
+                radians = -radians + offset  # Invert direction if needed
+                positions.append(float(radians))  # Ensure values are floats
+                # self.get_logger().info(f"Read position for {motor_name}: {step}")
 
-                except Exception as e:
-                    self.get_logger().warn(f"Failed to process joint {motor_name}: {e}")
-                    positions.append(0)
-            else:
-                positions.append(0)
-
-        # Write all positions and velocities
-        self.motors_bus.write("Goal_Position", np.array(positions), motor_order)
-
-        # self.get_logger().info(f"Set positions: {positions}")
+        except Exception as e:
+            self.get_logger().warn(f"Failed to read positions for motors: {e}")
+            positions = [0.0] * len(msg.name)  # Default to 0.0 for all motors if there's an error
+        msg.position = positions  # Assign a flat list of floats
+        self.joint_state_pub.publish(msg)
 
     def set_motor_acceleration(self, acceleration: int):
         """Set acceleration for all motors."""
@@ -93,6 +80,27 @@ class GiraffeHardwareInterface(Node):
         degrees = np.degrees(radians)  # Convert radians to degrees
         steps = int(degrees / 360.0 * resolution)  # Map degrees to steps
         return steps
+
+    def joint_trajectory_callback(self, msg: JointTrajectory):
+        for point in msg.points:
+            positions = point.positions
+            motor_positions = []
+            homing_offsets = [-2082, -999, -936, -2023, -2046, -2410]
+            for motor_name, offset in zip(self.motors_bus.motor_names[:-1], homing_offsets[:-1]):
+                if motor_name in msg.joint_names:
+                    idx = msg.joint_names.index(motor_name)
+                    model = self.motors_bus.motors[motor_name][1]
+                    # Convert radians to steps
+                    step_value = self.radians_to_steps(positions[idx], model) - offset
+                    motor_positions.append(step_value)
+                else:
+                    motor_positions.append(0)  # Default to 0 if no position provided
+            motor_positions.append(2410)
+            try:
+                self.get_logger().info(f"Sent positions in steps: {motor_positions}")
+                self.motors_bus.write("Goal_Position", motor_positions, self.motors_bus.motor_names)  # Write all motors at once
+            except Exception as e:
+                self.get_logger().warn(f"Failed to send positions to motors: {e}")
 
 
 def main(args=None):

@@ -9,6 +9,6 @@
     <xacro:include filename="giraffe.ros2_control.xacro" />
 
 
-    <xacro:giraffe_ros2_control name="FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
+    <xacro:giraffe_ros2_control/>
 
 </robot>

@@ -13,16 +13,18 @@
             <hardware>
                 <plugin>gazebo_ros2_control/GazeboSystem</plugin>
             </hardware>
-
+            <!-- <hardware>
+                <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+                <param name="joint_commands_topic">/topic_based_joint_commands</param>
+                <param name="joint_states_topic">/topic_based_joint_states</param>
+                <param name="sum_wrapped_joint_states">true</param>
+            </hardware> -->
             <joint name="base_link_shoulder_pan_joint">
                 <command_interface name="position">
                     <param name="min">-1.833</param>
                     <param name="max">1.833</param>
                 </command_interface>
                 <state_interface name="position">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
-                <state_interface name="velocity">
                     <param name="initial_value">0.0</param>
                 </state_interface>
             </joint>
@@ -35,9 +37,6 @@
                 <state_interface name="position">
                     <param name="initial_value">0.0</param>
                 </state_interface>
-                <state_interface name="velocity">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
             </joint>
 
             <joint name="shoulder_lift_elbow_joint">
@@ -46,9 +45,6 @@
                     <param name="max">1.745</param>
                 </command_interface>
                 <state_interface name="position">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
-                <state_interface name="velocity">
                     <param name="initial_value">0.0</param>
                 </state_interface>
             </joint>
@@ -61,9 +57,6 @@
                 <state_interface name="position">
                     <param name="initial_value">0.0</param>
                 </state_interface>
-                <state_interface name="velocity">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
             </joint>
 
             <joint name="wrist_1_wrist_2_joint">
@@ -74,9 +67,6 @@
                 <state_interface name="position">
                     <param name="initial_value">0.0</param>
                 </state_interface>
-                <state_interface name="velocity">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
             </joint>
 
             <joint name="wrist_2_gripper_joint">
@@ -85,9 +75,6 @@
                     <param name="max">1.571</param>
                 </command_interface>
                 <state_interface name="position">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
-                <state_interface name="velocity">
                     <param name="initial_value">0.0</param>
                 </state_interface>
             </joint>
