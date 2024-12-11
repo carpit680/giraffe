@@ -10,7 +10,9 @@
                                Why should fun be out of reach?
 ```
 
-A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-effective, ROS2-compatible, Open-Source robotic manipulator designed to lower the barriers to entry for Embodied AI.
+A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-effective, ROS2-compatible, Open-Source robotic manipulator designed to lower the barriers to entry for Embodied AI and whatever else your robotic dreams may be.
+
+
 
 ---
 
@@ -18,18 +20,23 @@ A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-ef
 
 > NOTE: Configurator and the rest of the high-level software stack is presently only compatible with Python.  
 
-### For Python
-
-Create and setup a virtual Environment
+### Clone the [giraffe](https://github.com/carpit680/giraffe) repository
 
 ``` bash
-git clone https://github.com/carpit680/giraffe.git
+git clone https://github.com/carpit680/giraffe.git -b moveit
 cd giraffe
+```
 
-python3 -m venv giraffe_env
-# echo "import sys; sys.path.append('$(pwd)')" >> giraffe_env/lib/$(python3 -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')/site-packages/sitecustomize.py
-source giraffe_env/bin/activate
+### Install dependencies
 
+```bash
 pip install -r requirements.txt
 pip install .
+```
+
+### Setup permissions
+
+```bash
+sudo usermod -a -G dialout $USER
+sudo newgrp dialout
 ```
