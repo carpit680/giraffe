@@ -9,13 +9,11 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess, RegisterEventHandler, DeclareLaunchArgument, TimerAction
 from launch.substitutions import Command, LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from moveit_configs_utils import MoveItConfigsBuilder
-from launch_param_builder import ParameterBuilder
 
 
 # LOAD FILE:
@@ -130,11 +128,6 @@ def generate_launch_description():
     )
 
     # *********************** MoveIt!2 *********************** #   
-    
-    # Command-line argument: RVIZ file?
-    rviz_arg = DeclareLaunchArgument(
-        "rviz_file", default_value="False", description="Load RVIZ file."
-    )
 
     # *** PLANNING CONTEXT *** #
     # Robot description, SRDF:
@@ -163,31 +156,6 @@ def generate_launch_description():
     ompl_planning_yaml = load_yaml("giraffe_moveit_config", "config/ompl_planning.yaml")
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
-    # MoveIt!2 Controllers:
-    moveit_simple_controllers_yaml = load_yaml("giraffe_moveit_config", "config/moveit_controllers.yaml")
-    moveit_controllers = {
-        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
-        "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
-        "use_sim_time": True,
-    }
-    trajectory_execution = {
-        "moveit_manage_controllers": True,
-        "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-        "trajectory_execution.allowed_goal_duration_margin": 0.5,
-        "trajectory_execution.allowed_start_tolerance": 0.01,
-    }
-    # sensors_yaml = load_yaml("giraffe_moveit_config", "config/sensors_3d.yaml")
-    planning_scene_monitor_parameters = {
-        "planning_scene_monitor": {
-            "publish_planning_scene": True,
-            "publish_geometry_updates": True,
-            "publish_state_updates": True,
-            "publish_transforms_updates": True,
-        }
-    }
-
-    joint_limits_yaml = load_yaml("giraffe_moveit_config", "config/joint_limits.yaml")
-    robot_description_planning = {"robot_description_planning": joint_limits_yaml}
     model_path = os.path.join(package_share, 'urdf', 'giraffe.urdf.xacro')
     robot_description_config = xacro.process_file(model_path)
     robot_description_config = robot_description_config.toxml()
@@ -210,18 +178,6 @@ def generate_launch_description():
         ],
     )
 
-    # Delay move_group node until controllers are up
-    delay_move_group_after_controllers = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=controller_manager,
-            on_exit=[
-                TimerAction(
-                    period=2.0,
-                    actions=[run_move_group_node]
-                )
-            ]
-        )
-    )
     # RVIZ:
     rviz_base = os.path.join(get_package_share_directory("giraffe_moveit_config"), "config")
     rviz_full_config = os.path.join(rviz_base, "moveit.rviz")
@@ -229,7 +185,6 @@ def generate_launch_description():
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        # namespace="moveit",
         output="log",
         arguments=["-d", rviz_full_config],
         parameters=[
@@ -254,9 +209,7 @@ def generate_launch_description():
         rviz_node_full,
         robot_state_publisher_node,
         hardware_interface_node,
-        # delay_controllers_after_joint_state_broadcaster_spawner,
-        load_joint_trajectory_controller, load_gripper_controller,
-        # delay_move_group_after_controllers,
+        delay_controllers_after_joint_state_broadcaster_spawner,
         TimerAction(
             period=5.0,
             actions=[controller_manager]
