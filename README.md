@@ -22,7 +22,7 @@ Most significant changes that we have made to achive this outcome are:
 
 ## Assembly Instructions
 
-![Image of Giraffe Rendered](https://github.com/carpit680/giraffe/tree/moveit/assets/render.png)
+![Image of Giraffe Rendered](assets/render.png)
 
 ### Sourcing Parts
 
@@ -81,7 +81,7 @@ When choosing a printer, keep the following recommended specifications in mind. 
 Construct the arms using this Assembly [Video](https://www.youtube.com/watch?v=8nQIg9BwwTk&=8m20s) (Note: Follow the assembly instructions provided for Follower Arm starting at 08:20 of the video). After you assemble the arms from the video, power the arm using the 12V power supply. In addition, plug the arm into your computer using a USB-C cable.
 
 The Arm after assembly should look like this:
-- ![Image of Giraffe](https://github.com/carpit680/giraffe/tree/moveit/assets/giraffe.png)
+- ![Image of Giraffe](assets/giraffe.png)
 
 ---
 
