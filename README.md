@@ -37,6 +37,7 @@ Order the off the shelf parts for the arm using the links below.
 | Power cord             | 1      | ₹95.00     | ₹95.00      | [Sharvi Electronics](https://sharvielectronics.com/product/3pin-250vac-6a-power-cord-with-open-ended-cable-1-8-meter/) |
 | USB-C cable            | 1      | ₹60.85     | ₹60.85      | [Sharvi Electronics](https://sharvielectronics.com/product/usb-2-0-a-type-male-usb-to-c-type-male-usb-cable-white-1-meter/) |
 | Table clamp            | 1      | ₹349.00    | ₹349.00     | [Amazon.in](https://www.amazon.in/Homdum%C2%AE-Heavy-Clamp-Clamping-Pieces/dp/B081JYTMMG/ref=sr_1_32?crid=QS1GUQTHCIA4&dib=eyJ2IjoiMSJ9.Y6mMQKO3pYbkI5fuZZzRhmnaPEBkYUkfOdl_Uj2xmTahB1NzMLIqDi11tQEZsaF1AxDV1ndeI3h8bgnuV-SC9BiiFRj-ue_9jcyv4AsPg8YFZYe88-nm9JJ-UuEi7mFuk_8BUDldMJHKtgjKadYxvK3mqiltsGnM-1lkpJP6EmLklcT_r5J6PWWOvkh3a61a820TLtVkROcI2NKFt01PPFNt-EFB345zzs7uvYM434AFK9pRAve6-BtV_NEjXxhXwu4jVUDtNKTafPm8gwMow4hQDV2vYJ3KfqIFEPE8McGscfs-zgWCnpzyl6Dw0D1JuSiDTOfO9F1zKRaEgtLh-O48MckMmsgBaoCpQPOQqy0NKi6T0F4Wchb-x0TGvVZlh8rBH70Wz2G03owy2XS0XfroLHMvSb0RIvstaE2XQ8ID1pp8pUB0JZzPzPM_asOy.AOdTW8GzBEwdDFN3hAbqILHzc8RUdrFOTYUdAGj1WnU&dib_tag=se&keywords=table%2Bclamp&qid=1734041544&refinements=p_72%3A1318476031&rnid=1318475031&sprefix=table%2Bclamp%2Caps%2C248&sr=8-32&th=1) |
+| Total |  |  | ₹14,490 | |
 
 
 ### Printing the Parts
@@ -67,7 +68,7 @@ When choosing a printer, keep the following recommended specifications in mind. 
    6. Verify the file format, select files from the hardware folder, and begin printing.
 
 
-**3. Print the Parts** Print one of each part found in `hardware/arm/STL`
+**3. Print the Parts** Print one of each part found in `CAD/STL`
    - List of Parts
 
 **4. Take Down**
