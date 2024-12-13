@@ -14,14 +14,14 @@ A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-ef
 
 To achieve these outcome, we implemented the following significant changes:
 
-### **Servo Selection**  
+#### **Servo Selection**  
 We designed the arm using cost-efficient Waveshare servos instead of Dynamixel servos, effectively doubling the torque while reducing costs.  
 
-### **Base Design Enhancements**  
+#### **Base Design Enhancements**  
 - Adjusted the base design to transfer the radial load from the base motor to the supporting structure, reducing motor stress.  
 - Relocated the servo driver closer to the base for compact design.
 
-### **Teleop Tongs Integration**  
+#### **Teleop Tongs Integration**  
 We integrated support for Teleop Tongs, another open-source project we built on top of Dex Teleop for the Stretch 3 robot by Hello Robot, designed for teleoperating general-purpose robotic manipulators. This system features a 3D-printed tongs assembly equipped with multiple fiducial markers, serving as a stand-in for the end effector. This design enables intuitive and accessible control of the robotic arm.
 
 The motivation behind this integration was to offer a cost-effective, and user-friendly alternative to traditional leader arms, which are often expensive and add further complexity. By using Teleop Tongs, operators can manipulate the robotic arm naturally, simplifying teleoperation for applications in education, research, and DIY robotics projects. 
