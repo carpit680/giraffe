@@ -12,19 +12,23 @@
 
 A [Koch v1.1](https://github.com/jess-moss/koch-v1-1) inspired even more cost-effective, ROS2-compatible, Open-Source robotic manipulator designed to lower the barriers of entry for Embodied AI and whatever else your robotic dreams may be.
 
-To achieve these outcome, we implemented the following significant changes:
+To achieve these outcomes, we implemented the following significant changes:
 
 #### **Servo Selection**  
-We designed the arm using cost-efficient Waveshare servos instead of Dynamixel servos, effectively doubling the torque while reducing costs.  
 
-#### **Base Design Enhancements**  
-- Adjusted the base design to transfer the radial load from the base motor to the supporting structure, reducing motor stress.  
-- Relocated the servo driver closer to the base for compact design.
+We redesigned the arm around cost-efficient Waveshare servos replacing Dynamixel servos, effectively doubling the torque while reducing costs.
+
+#### **Design Enhancements**  
+
+- Adjusted the base design to transfer the radial load from the base motor to the supporting structure, reducing motor stress.
+- Relocated the servo driver closer to the base for cleaner design.
+- The servo mounts were redesigned to utilize the fasteners provided with the servos, minimizing the required assembly components to just the servos, 3D-printed parts, and a screwdriver.
 
 #### **Teleop Tongs Integration**  
-We integrated support for Teleop Tongs, another open-source project we built on top of Dex Teleop for the Stretch 3 robot by Hello Robot, designed for teleoperating general-purpose robotic manipulators. This system features a 3D-printed tongs assembly equipped with multiple fiducial markers, serving as a stand-in for the end effector. This design enables intuitive and accessible control of the robotic arm.
 
-The motivation behind this integration was to offer a cost-effective, and user-friendly alternative to traditional leader arms, which are often expensive and add further complexity. By using Teleop Tongs, operators can manipulate the robotic arm naturally, simplifying teleoperation for applications in education, research, and DIY robotics projects. 
+We integrated support for Teleop Tongs, another open-source project we built on top of Dex Teleop (for the Stretch 3 robot by Hello Robot), designed for teleoperating general-purpose robotic manipulators. This system features a 3D-printed tongs assembly equipped with multiple fiducial markers, serving as a stand-in for the end effector. This design enables intuitive and accessible control of the robotic arm.
+
+The motivation behind this integration was to offer a cost-effective, and user-friendly alternative to a leader & follower arm setup. By using Teleop Tongs, operators can manipulate the robotic arm naturally, simplifying teleoperation for applications in education, research, and DIY robotics projects.
 
 ---
 
@@ -83,14 +87,13 @@ When choosing a printer, keep the following recommended specifications in mind. 
 - After the print is done, use the putty knife to scrape the the parts off the print bed.
 - Remove any support material from parts.
 
----
+### Assembling the Parts
 
-## Assembling the Parts
-
-Construct the arms using this Assembly [Video](https://www.youtube.com/watch?v=8nQIg9BwwTk&=8m20s) (Note: Follow the assembly instructions provided for Follower Arm starting at 08:20 of the video). After you assemble the arms from the video, power the arm using the 12V power supply. In addition, plug the arm into your computer using a USB-C cable.
+Construct the arms using this Assembly [Video](https://www.youtube.com/watch?v=8nQIg9BwwTk&t=8m20s) (Note: Follow the assembly instructions provided for Follower Arm starting at 08:20 of the video). After you assemble the arms from the video, power the arm using the 12V power supply. In addition, plug the arm into your computer using a USB-C cable.
 
 The Arm after assembly should look like this:
-- ![Image of Giraffe](assets/giraffe.png)
+
+![Image of Giraffe](assets/giraffe.png)
 
 ---
 
