@@ -34,7 +34,7 @@ class GiraffeHardwareInterface(Node):
 
         # Timer for publishing joint states
         self.offsets = [3.223, 3.043, 2.979, 3.152, 1.577, 4.9547]
-        self.set_motor_acceleration(10)
+        self.set_motor_acceleration(10, 50)
     
     def joint_state_callback(self, msg: JointState):
         """
@@ -74,13 +74,17 @@ class GiraffeHardwareInterface(Node):
 
         # self.get_logger().info(f"Set positions: {positions}")
 
-    def set_motor_acceleration(self, acceleration: int):
+    def set_motor_acceleration(self, acceleration: int, gripper_acceleration: int):
         """Set acceleration for all motors."""
         try:
             motor_names = self.motors_bus.motor_names
-            accelerations = [acceleration] * len(motor_names)
-            self.motors_bus.write("Acceleration", accelerations, motor_names)
-            self.get_logger().info(f"Set acceleration to {acceleration} for all motors.")
+            non_gripper_motors = motor_names[:-1]
+            accelerations = [acceleration] * len(non_gripper_motors)
+            self.motors_bus.write("Acceleration", accelerations, non_gripper_motors)
+            gripper = motor_names[-1]
+            self.motors_bus.write("Acceleration", gripper_acceleration, gripper)
+            self.get_logger().info(f"Set acceleration to {acceleration} for {motor_names[:-1]}.")
+            self.get_logger().info(f"Set acceleration to {gripper_acceleration} for {gripper}.")
         except Exception as e:
             self.get_logger().warn(f"Failed to set acceleration for motors: {e}")
 
