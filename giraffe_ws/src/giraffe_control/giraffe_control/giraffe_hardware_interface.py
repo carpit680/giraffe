@@ -29,8 +29,9 @@ class GiraffeHardwareInterface(Node):
         # ROS topics
         # self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
         self.joint_command_sub = self.create_subscription(
-            JointState, "/joint_states", self.joint_state_callback, 10
+            JointTrajectory, "/arm_controller/joint_trajectory", self.joint_state_callback, 10
         )
+
 
         # Timer for publishing joint states
         self.offsets = [3.223, 3.043, 2.979, 3.152, 1.577, 4.9547]
