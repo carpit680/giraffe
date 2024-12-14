@@ -127,5 +127,5 @@ sudo newgrp dialout
 Use the configurator script in `scripts/` directory
 
 ```bash
-python3 scripts/configurator.py
+python3 scripts/st_configurator.py
 ```
