@@ -121,3 +121,11 @@ pip install .
 sudo usermod -a -G dialout $USER
 sudo newgrp dialout
 ```
+
+### Setup servo IDs
+
+Use the configurator script in `scripts/` directory
+
+```bash
+python3 scripts/configurator.py
+```

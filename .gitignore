@@ -7,3 +7,5 @@ build/
 install/
 log/
 /giraffe_ws/src/.vscode
+.vscode/
+.DS_Store
