@@ -120,7 +120,7 @@ The Arm after assembly should look like this:
 ### Clone the [giraffe](https://github.com/carpit680/giraffe) repository
 
 ```bash
-git clone https://github.com/carpit680/giraffe.git -b moveit
+git clone https://github.com/carpit680/giraffe.git -b ros2
 cd giraffe
 ```
 
