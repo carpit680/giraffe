@@ -95,7 +95,7 @@ def generate_launch_description():
     spawn_robot = Node(
         package='ros_ign_gazebo',
         executable='create',
-        arguments=['-file', os.path.join(giraffe_description, 'models', 'giraffe.urdf.xacro'),
+        arguments=['-file', os.path.join(giraffe_description, 'urdf', 'giraffe.urdf.xacro'),
                 '-name', 'giraffe',
                 '-allow_renaming', 'true'],
         output='screen'
