@@ -9,13 +9,15 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>urdf</exec_depend>
-  <exec_depend>joint_state_publisher_gui</exec_depend>
-  <exec_depend>rviz2</exec_depend>
-  <exec_depend>xacro</exec_depend>
-  <exec_depend>ros2launch</exec_depend>
-  <exec_depend>ros_gz</exec_depend>
+  <depend>robot_state_publisher</depend>
+  <depend>urdf</depend>
+  <depend>rviz2</depend>
+  <depend>xacro</depend>
+  <depend>ros2launch</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>ros_gz_image</depend>
+  <depend>ros_gz_sim</depend>
+  
 
 
 

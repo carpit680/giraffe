@@ -2,19 +2,18 @@
 <robot name="giraffe" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
     <xacro:macro name="giraffe_ros2_control">
-        <gazebo>
-            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-                <robotNamespace>/</robotNamespace>
-                <controlPeriod>0.01</controlPeriod>
-                <robotParam>robot_description</robotParam>
+            <gazebo>
+            <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+                <robot_param>robot_description</robot_param>
+                <robot_param_node>robot_state_publisher</robot_param_node>
                 <parameters>$(find giraffe_description)/config/giraffe_controller.yaml</parameters>
             </plugin>
         </gazebo>
 
 
-        <ros2_control name="GazeboSystem" type="system">
+        <ros2_control name="IgnitionSystem" type="system">
             <hardware>
-                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+                <plugin>ign_ros2_control/IgnitionSystem</plugin>
             </hardware>
             <!-- <hardware>
                 <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>

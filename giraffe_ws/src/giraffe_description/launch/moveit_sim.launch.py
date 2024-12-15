@@ -45,7 +45,7 @@ def generate_launch_description():
     package_share = get_package_share_path('giraffe_description')
 
     giraffe_description_share = get_package_prefix('giraffe_description')
-    gazebo_ros_dir = get_package_share_directory('ros_gz_sim')
+    ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
     model_arg = DeclareLaunchArgument(name='model', default_value=os.path.join(
                                         giraffe_description, 'urdf', 'giraffe.urdf.xacro'
@@ -82,14 +82,16 @@ def generate_launch_description():
 
     start_gazebo_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gz_sim.launch.py')
-        )
+            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={'gz_args': ['-r -s -v4'], 'on_exit_shutdown': 'true'}.items()
     )
 
     start_gazebo_client = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gz_sim.launch.py')
-        )
+            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={'gz_args': '-g -v4 '}.items()
     )
 
     spawn_robot = Node(
