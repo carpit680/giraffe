@@ -16,6 +16,7 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from moveit_configs_utils import MoveItConfigsBuilder
 from launch_param_builder import ParameterBuilder
+from launch.actions import AppendEnvironmentVariable
 
 
 # LOAD FILE:
@@ -44,7 +45,7 @@ def generate_launch_description():
     package_share = get_package_share_path('giraffe_description')
 
     giraffe_description_share = get_package_prefix('giraffe_description')
-    gazebo_ros_dir = get_package_share_directory('gazebo_ros')
+    ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
     model_arg = DeclareLaunchArgument(name='model', default_value=os.path.join(
                                         giraffe_description, 'urdf', 'giraffe.urdf.xacro'
@@ -55,7 +56,7 @@ def generate_launch_description():
     model_path = os.path.join(giraffe_description, "models")
     model_path += pathsep + os.path.join(giraffe_description_share, "share")
 
-    env_var = SetEnvironmentVariable('GAZEBO_MODEL_PATH', model_path)
+    env_var = AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', model_path)
 
     robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]),
                                        value_type=str)
@@ -81,22 +82,28 @@ def generate_launch_description():
 
     start_gazebo_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gzserver.launch.py')
-        )
+            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={'gz_args': ['-r -s -v4'], 'on_exit_shutdown': 'true'}.items()
     )
 
     start_gazebo_client = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gzclient.launch.py')
-        )
+            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={'gz_args': '-g -v4 '}.items()
     )
 
-    spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-entity', 'giraffe',
-                                   '-topic', 'robot_description',
-                                  ],
-                        output='screen'
-    )
+    spawn_robot = Node(
+        package='ros_ign_gazebo',
+        executable='create',
+        arguments=['-file', os.path.join(giraffe_description, 'urdf', 'giraffe.urdf.xacro'),
+                '-name', 'giraffe',
+                '-allow_renaming', 'true'],
+        output='screen'
+)
+
+    
 
     controller_manager = Node(
         package="controller_manager",
