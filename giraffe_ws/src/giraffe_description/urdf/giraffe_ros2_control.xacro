@@ -4,10 +4,13 @@
     <xacro:macro name="giraffe_ros2_control">
         <gazebo>
             <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-                <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
+                <robotNamespace>/</robotNamespace>
+                <controlPeriod>0.01</controlPeriod>
+                <robotParam>robot_description</robotParam>
                 <parameters>$(find giraffe_description)/config/giraffe_controller.yaml</parameters>
             </plugin>
         </gazebo>
+
 
         <ros2_control name="GazeboSystem" type="system">
             <hardware>
