@@ -1,23 +1,35 @@
+# Copyright 2024 Arpit Chauhan.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import yaml
-import xacro
 from os import pathsep
-from launch.actions import ExecuteProcess
-from ament_index_python.packages import get_package_share_directory, get_package_prefix, get_package_share_path
+
+from ament_index_python.packages import get_package_share_directory, get_package_share_path, get_package_prefix
+
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, ExecuteProcess, RegisterEventHandler, DeclareLaunchArgument, TimerAction
-from launch.substitutions import Command, LaunchConfiguration
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.conditions import IfCondition, UnlessCondition
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.actions import RegisterEventHandler, TimerAction
 from launch.event_handlers import OnProcessExit
-
-from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-from moveit_configs_utils import MoveItConfigsBuilder
-from launch_param_builder import ParameterBuilder
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch.actions import AppendEnvironmentVariable
+from moveit_configs_utils import MoveItConfigsBuilder
+from launch_ros.actions import Node
 
+import xacro
 
 # LOAD FILE:
 def load_file(package_name, file_path):
@@ -41,106 +53,64 @@ def load_yaml(package_name, file_path):
         return None
 
 def generate_launch_description():
-    giraffe_description = get_package_share_directory('giraffe_description')
+    # Launch Arguments
+    use_sim_time = LaunchConfiguration('use_sim_time', default=True)
+
     package_share = get_package_share_path('giraffe_description')
-
+    giraffe_description_path = os.path.join(
+        get_package_share_directory('giraffe_description'))
     giraffe_description_share = get_package_prefix('giraffe_description')
-    ros_gz_sim = get_package_share_directory('ros_gz_sim')
-
-    model_arg = DeclareLaunchArgument(name='model', default_value=os.path.join(
-                                        giraffe_description, 'urdf', 'giraffe.urdf.xacro'
-                                        ),
-                                      description='Absolute path to robot urdf file'
-    )
-
-    model_path = os.path.join(giraffe_description, "models")
+    model_path = os.path.join(giraffe_description_path, "models")
     model_path += pathsep + os.path.join(giraffe_description_share, "share")
 
     env_var = AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', model_path)
+    xacro_file = os.path.join(giraffe_description_path,
+                              'urdf',
+                              'giraffe.xacro.urdf')
 
-    robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]),
-                                       value_type=str)
+    doc = xacro.parse(open(xacro_file))
+    xacro.process_doc(doc)
+    params = {'robot_description': doc.toxml()}
 
-    robot_state_publisher_node = Node(
+    node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[
-            {'robot_description': robot_description},
-            {'use_sim_time': True}
-        ]
-    )
-
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=[
-            "joint_state_broadcaster",
-            "--controller-manager",
-            "/controller_manager",
-        ],
-    )
-
-    start_gazebo_server = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': ['-r -s -v4'], 'on_exit_shutdown': 'true'}.items()
-    )
-
-    start_gazebo_client = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': '-g -v4 '}.items()
-    )
-
-    spawn_robot = Node(
-        package='ros_ign_gazebo',
-        executable='create',
-        arguments=['-file', os.path.join(giraffe_description, 'urdf', 'giraffe.urdf.xacro'),
-                '-name', 'giraffe',
-                '-allow_renaming', 'true'],
-        output='screen'
-)
-
-    
-
-    controller_manager = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[ 
-                    {'use_sim_time': True},
-                    os.path.join(get_package_share_directory("giraffe_description"), "config", "giraffe_controller.yaml")],
-        output="screen",
-    )
-    load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state',
-             'active', 'arm_controller'],
-        output='screen')
-    load_gripper_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state',
-             'active', 'gripper_controller'],
-        output='screen')
-    
-    # Delay start of robot controllers
-    delay_controllers_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[load_joint_trajectory_controller, load_gripper_controller],
-        )
-    )
-    # Diagnostic node to list controllers
-    list_controllers = ExecuteProcess(
-        cmd=['ros2', 'control', 'list_controllers'],
         output='screen',
-        shell=True
+        parameters=[params]
     )
 
-    # *********************** MoveIt!2 *********************** #   
-    
-    # Command-line argument: RVIZ file?
-    rviz_arg = DeclareLaunchArgument(
-        "rviz_file", default_value="False", description="Load RVIZ file."
+    ignition_spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        output='screen',
+        arguments=['-string', doc.toxml(),
+                   '-name', 'giraffe',
+                   '-allow_renaming', 'true'],
+    )
+
+    load_joint_state_broadcaster = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'joint_state_broadcaster'],
+        output='screen'
+    )
+
+    load_arm_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'arm_controller'],
+        output='screen'
+    )
+    load_gripper_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'gripper_controller'],
+        output='screen'
+    )
+
+    # Bridge
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
     )
 
     # *** PLANNING CONTEXT *** #
@@ -170,31 +140,7 @@ def generate_launch_description():
     ompl_planning_yaml = load_yaml("giraffe_moveit_config", "config/ompl_planning.yaml")
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
-    # MoveIt!2 Controllers:
-    moveit_simple_controllers_yaml = load_yaml("giraffe_moveit_config", "config/moveit_controllers.yaml")
-    moveit_controllers = {
-        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
-        "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
-        "use_sim_time": True,
-    }
-    trajectory_execution = {
-        "moveit_manage_controllers": True,
-        "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-        "trajectory_execution.allowed_goal_duration_margin": 0.5,
-        "trajectory_execution.allowed_start_tolerance": 0.01,
-    }
-    # sensors_yaml = load_yaml("giraffe_moveit_config", "config/sensors_3d.yaml")
-    planning_scene_monitor_parameters = {
-        "planning_scene_monitor": {
-            "publish_planning_scene": True,
-            "publish_geometry_updates": True,
-            "publish_state_updates": True,
-            "publish_transforms_updates": True,
-        }
-    }
-
-    joint_limits_yaml = load_yaml("giraffe_moveit_config", "config/joint_limits.yaml")
-    robot_description_planning = {"robot_description_planning": joint_limits_yaml}
+    # joint_limits_yaml = load_yaml("giraffe_moveit_config", "config/joint_limits.yaml")
     model_path = os.path.join(package_share, 'urdf', 'giraffe.urdf.xacro')
     robot_description_config = xacro.process_file(model_path)
     robot_description_config = robot_description_config.toxml()
@@ -206,6 +152,7 @@ def generate_launch_description():
         .trajectory_execution(file_path="config/moveit_controllers.yaml")
         .to_moveit_configs()
     )
+
     # START NODE -> MOVE GROUP:
     run_move_group_node = Node(
         package="moveit_ros_move_group",
@@ -217,18 +164,6 @@ def generate_launch_description():
         ],
     )
 
-    # Delay move_group node until controllers are up
-    delay_move_group_after_controllers = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=controller_manager,
-            on_exit=[
-                TimerAction(
-                    period=2.0,
-                    actions=[run_move_group_node]
-                )
-            ]
-        )
-    )
     # RVIZ:
     rviz_base = os.path.join(get_package_share_directory("giraffe_moveit_config"), "config")
     rviz_full_config = os.path.join(rviz_base, "moveit.rviz")
@@ -236,7 +171,6 @@ def generate_launch_description():
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        # namespace="moveit",
         output="log",
         arguments=["-d", rviz_full_config],
         parameters=[
@@ -247,31 +181,37 @@ def generate_launch_description():
             kinematics_yaml,
         ]
     )
-
     return LaunchDescription([
         env_var,
-        model_arg,
-        start_gazebo_server,
-        start_gazebo_client,
-        spawn_robot,
-        rviz_node_full,
-        robot_state_publisher_node,
-        delay_controllers_after_joint_state_broadcaster_spawner,
-        # delay_move_group_after_controllers,
-        TimerAction(
-            period=5.0,
-            actions=[controller_manager]
+        # Launch gazebo environment
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [os.path.join(get_package_share_directory('ros_ign_gazebo'),
+                              'launch', 'ign_gazebo.launch.py')]),
+            launch_arguments=[('gz_args', [' -r -v 4 empty.sdf'])]),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=ignition_spawn_entity,
+                on_exit=[load_joint_state_broadcaster],
+            )
         ),
-        TimerAction(
-            period=10.0,
-            actions=[joint_state_broadcaster_spawner]
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_state_broadcaster,
+                on_exit=[load_arm_controller, load_gripper_controller],
+            )
         ),
+        node_robot_state_publisher,
+        ignition_spawn_entity,
+        # Launch Arguments
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value=use_sim_time,
+            description='If true, use simulated clock'),
+        bridge,
         TimerAction(
             period=5.0,
             actions=[run_move_group_node]
         ),
-        TimerAction(
-            period=15.0,
-            actions=[list_controllers]
-        )
+        rviz_node_full,
     ])
