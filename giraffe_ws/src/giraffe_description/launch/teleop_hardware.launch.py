@@ -1,95 +1,96 @@
+# Copyright 2024 Arpit Chauhan.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 from os import pathsep
-from launch.actions import ExecuteProcess
+
 from ament_index_python.packages import get_package_share_directory, get_package_prefix
 
+
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
-from launch.substitutions import Command, LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
+from launch.actions import AppendEnvironmentVariable
 
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
+
+import xacro
 
 
 def generate_launch_description():
-    giraffe_description = get_package_share_directory('giraffe_description')
+    # Launch Arguments
+    use_sim_time = LaunchConfiguration('use_sim_time', default=True)
+
+    giraffe_description_path = os.path.join(
+        get_package_share_directory('giraffe_description'))
     giraffe_description_share = get_package_prefix('giraffe_description')
-    gazebo_ros_dir = get_package_share_directory('gazebo_ros')
-
-    model_arg = DeclareLaunchArgument(name='model', default_value=os.path.join(
-                                        giraffe_description, 'urdf', 'giraffe.urdf.xacro'
-                                        ),
-                                      description='Absolute path to robot urdf file'
-    )
-
-    model_path = os.path.join(giraffe_description, "models")
+    model_path = os.path.join(giraffe_description_path, "models")
     model_path += pathsep + os.path.join(giraffe_description_share, "share")
 
-    env_var = SetEnvironmentVariable('GAZEBO_MODEL_PATH', model_path)
+    env_var = AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', model_path)
+    xacro_file = os.path.join(giraffe_description_path,
+                              'urdf',
+                              'giraffe.xacro.urdf')
 
-    robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]),
-                                       value_type=str)
+    doc = xacro.parse(open(xacro_file))
+    xacro.process_doc(doc)
+    params = {'robot_description': doc.toxml()}
 
-    robot_state_publisher_node = Node(
+    node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': robot_description}]
-    )
-
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=[
-            "joint_state_broadcaster",
-            "--controller-manager",
-            "/controller_manager",
-        ],
-    )
-
-    start_gazebo_server = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gzserver.launch.py')
-        )
-    )
-
-    start_gazebo_client = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_dir, 'launch', 'gzclient.launch.py')
-        )
-    )
-
-    rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
         output='screen',
-        arguments=['-d', os.path.join(giraffe_description, 'rviz', 'display.rviz')],
+        parameters=[params]
     )
 
-    spawn_robot = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-entity', 'giraffe',
-                                   '-topic', 'robot_description',
-                                  ],
-                        output='screen'
+    ignition_spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        output='screen',
+        arguments=['-string', doc.toxml(),
+                   '-name', 'giraffe',
+                   '-allow_renaming', 'true'],
     )
 
-    controller_manager = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[ 
-                    {'use_sim_time': True},
-                    os.path.join(get_package_share_directory("giraffe_description"), "config", "giraffe_controller.yaml")],
-        output="screen",
+    load_joint_state_broadcaster = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'joint_state_broadcaster'],
+        output='screen'
     )
-    load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state',
-             'active', 'arm_controller'],
-        output='screen')
+
+    load_arm_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'arm_controller'],
+        output='screen'
+    )
     load_gripper_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state',
-             'active', 'gripper_controller'],
-        output='screen')
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
+             'gripper_controller'],
+        output='screen'
+    )
+
+    # Bridge
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
+    )
+
     hardware_interface_node = Node(
         package="giraffe_control",
         executable="giraffe_hardware_interface",
@@ -97,14 +98,31 @@ def generate_launch_description():
     )
     return LaunchDescription([
         env_var,
-        rviz_node,
-        model_arg,
-        start_gazebo_server,
+        # Launch gazebo environment
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [os.path.join(get_package_share_directory('ros_ign_gazebo'),
+                              'launch', 'ign_gazebo.launch.py')]),
+            launch_arguments=[('gz_args', [' -r -v 4 empty.sdf'])]),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=ignition_spawn_entity,
+                on_exit=[load_joint_state_broadcaster],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_state_broadcaster,
+                on_exit=[load_arm_controller, load_gripper_controller],
+            )
+        ),
+        node_robot_state_publisher,
+        ignition_spawn_entity,
         hardware_interface_node,
-        robot_state_publisher_node,
-        spawn_robot,
-        load_joint_trajectory_controller,
-        load_gripper_controller,
-        controller_manager,
-        joint_state_broadcaster_spawner
+        # Launch Arguments
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value=use_sim_time,
+            description='If true, use simulated clock'),
+        bridge,
     ])
