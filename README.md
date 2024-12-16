@@ -53,11 +53,11 @@ Order the off the shelf parts for the arm using the links below.
 | Table clamp                             | 1      | ₹349.00   | ₹349.00    | [Amazon.in](https://www.amazon.in/Homdum%C2%AE-Heavy-Clamp-Clamping-Pieces/dp/B081JYTMMG/ref=sr_1_32?crid=QS1GUQTHCIA4&dib=eyJ2IjoiMSJ9.Y6mMQKO3pYbkI5fuZZzRhmnaPEBkYUkfOdl_Uj2xmTahB1NzMLIqDi11tQEZsaF1AxDV1ndeI3h8bgnuV-SC9BiiFRj-ue_9jcyv4AsPg8YFZYe88-nm9JJ-UuEi7mFuk_8BUDldMJHKtgjKadYxvK3mqiltsGnM-1lkpJP6EmLklcT_r5J6PWWOvkh3a61a820TLtVkROcI2NKFt01PPFNt-EFB345zzs7uvYM434AFK9pRAve6-BtV_NEjXxhXwu4jVUDtNKTafPm8gwMow4hQDV2vYJ3KfqIFEPE8McGscfs-zgWCnpzyl6Dw0D1JuSiDTOfO9F1zKRaEgtLh-O48MckMmsgBaoCpQPOQqy0NKi6T0F4Wchb-x0TGvVZlh8rBH70Wz2G03owy2XS0XfroLHMvSb0RIvstaE2XQ8ID1pp8pUB0JZzPzPM_asOy.AOdTW8GzBEwdDFN3hAbqILHzc8RUdrFOTYUdAGj1WnU&dib_tag=se&keywords=table%2Bclamp&qid=1734041544&refinements=p_72%3A1318476031&rnid=1318475031&sprefix=table%2Bclamp%2Caps%2C248&sr=8-32&th=1) |
 | Total                                   |        |           | ₹14,490    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
-### Printing the Parts
+### Printing The Parts
 
 A variety of 3D printers can be used to print the necessary parts for the arm. Follow these steps for optimal printing results.
 
-#### 1. Select a Printer
+#### 1. Select A Printer
 
 When choosing a printer, keep the following recommended specifications in mind. While other printers may work, these spececifications are a good starting point:
 
@@ -67,7 +67,7 @@ When choosing a printer, keep the following recommended specifications in mind. 
 - **Infill Density:** Approximately 30%
 - **Suggested Printers:** Prusa Mini+, Bambu P1, Ender3, and similar models
 
-#### 2. Prepare the Printer
+#### 2. Prepare The Printer
 
 - **Materials Needed:**
 
@@ -82,7 +82,7 @@ When choosing a printer, keep the following recommended specifications in mind. 
   5. Adjust the printer settings to match the recommended specifications listed above.
   6. Verify the file format, select files from the hardware folder, and begin printing.
 
-#### 3. Print the Parts
+#### 3. Print The Parts
 
 Print one of each part found in `CAD/STL`
 
@@ -103,7 +103,7 @@ Print one of each part found in `CAD/STL`
 - After the print is done, use the putty knife to scrape the the parts off the print bed.
 - Remove any support material from parts.
 
-### Assembling the Parts
+### Assembling The Parts
 
 Construct the arms using this Assembly [Video](https://www.youtube.com/watch?v=8nQIg9BwwTk&t=8m20s) (Note: Follow the assembly instructions provided for Follower Arm starting at 08:20 of the video). After you assemble the arms from the video, power the arm using the 12V power supply. In addition, plug the arm into your computer using a USB-C cable.
 
@@ -113,40 +113,43 @@ The Arm after assembly should look like this:
 
 ---
 
-## Hardware setup Instructions
+## Hardware Setup Instructions
 
 > NOTE: Configurator and the rest of the high-level software stack is presently only compatible with Python.
 
-### Clone the [giraffe](https://github.com/carpit680/giraffe) repository
+### Clone The [giraffe](https://github.com/carpit680/giraffe) Repository
 
 ```bash
 git clone https://github.com/carpit680/giraffe.git -b ros2
 cd giraffe
 ```
 
-### Install dependencies
+### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 pip install .
 ```
 
-### Setup permissions
+### Setup Permissions
 
 ```bash
 sudo usermod -a -G dialout $USER
 sudo newgrp dialout
 ```
 
-### Setup servo IDs
+### Setup Servo IDs
 
 Use the configurator script in `scripts/` directory
 
 ```bash
 python3 scripts/st_configurator.py
 ```
+## Optional ROS2 Docker Development Environment Setup
 
-## ROS2 worksapce setup
+Follow the instructions given here to set up a ROS2 Docker development environment: [ros2_docker_env](https://github.com/carpit680/ros2_docker_env)
+
+## ROS2 Worksapce Setup
 
 1. Install ROS2 Humble following these [installation instructions](https://docs.ros.org/en/humble/Installation.html).
 2. Install Gazebo Ignition Fortress(LTS) following these [instructions](https://gazebosim.org/docs/fortress/install_ubuntu/).
@@ -188,7 +191,7 @@ python3 scripts/st_configurator.py
    source install/local_setup.bash
    ```
 
-## ROS2 workspace description
+## ROS2 Workspace Description
 
 ### giraffe_description
 
