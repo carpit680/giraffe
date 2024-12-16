@@ -96,6 +96,15 @@ def generate_launch_description():
         executable="giraffe_hardware_interface",
         output="screen",
     )
+    rviz_base = os.path.join(get_package_share_directory("giraffe_control"), "config")
+    rviz_full_config = os.path.join(rviz_base, "teleop.rviz")
+    rviz_node_full = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="log",
+        arguments=["-d", rviz_full_config],
+    )
     return LaunchDescription([
         env_var,
         # Launch gazebo environment
@@ -118,11 +127,12 @@ def generate_launch_description():
         ),
         node_robot_state_publisher,
         ignition_spawn_entity,
-        hardware_interface_node,
         # Launch Arguments
         DeclareLaunchArgument(
             'use_sim_time',
             default_value=use_sim_time,
             description='If true, use simulated clock'),
         bridge,
+        hardware_interface_node,
+        rviz_node_full,
     ])
