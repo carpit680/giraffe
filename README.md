@@ -163,8 +163,6 @@ python3 scripts/st_configurator.py
    ```bash
    sudo apt install -y ros-humble-ros2-control ros-humble-ros2-controllers
    sudo apt install -y python3-colcon-common-extensions python3-rosdep
-   sudo apt install -y build-essential git
-
    ```
 
 5. Set Up giraffe_ws
