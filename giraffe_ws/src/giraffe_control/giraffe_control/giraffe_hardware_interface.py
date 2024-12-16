@@ -29,7 +29,7 @@ class GiraffeHardwareInterface(Node):
         # ROS topics
         # self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
         self.joint_command_sub = self.create_subscription(
-            JointTrajectory, "/arm_controller/joint_trajectory", self.joint_state_callback, 10
+            JointState, "/joint_states", self.joint_state_callback, 10
         )
 
 
