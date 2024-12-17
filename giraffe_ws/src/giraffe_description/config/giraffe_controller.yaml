@@ -1,6 +1,7 @@
+---
 controller_manager:
   ros__parameters:
-    update_rate: 50  # Hz
+    update_rate: 50
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -35,7 +36,7 @@ joint_state_broadcaster:
       - elbow_wrist_1_joint
       - wrist_1_wrist_2_joint
       - wrist_2_gripper_joint
-    publish_rate: 50  # Hz
+    publish_rate: 50
 
 arm_controller:
   ros__parameters:
@@ -62,12 +63,11 @@ arm_controller:
     allow_nonzero_velocity_at_trajectory_end: false
     constraints:
       stopped_velocity_tolerance: 0.2
-      # goal_time: 0.0
-      base_link_shoulder_pan_joint: { trajectory: 0.4, goal: 0.4 }
-      shoulder_pan_shoulder_lift_joint: { trajectory: 0.4, goal: 0.4 }
-      shoulder_lift_elbow_joint: { trajectory: 0.4, goal: 0.4 }
-      elbow_wrist_1_joint: { trajectory: 0.4, goal: 0.4 }
-      wrist_1_wrist_2_joint: { trajectory: 0.4, goal: 0.4 }
+      base_link_shoulder_pan_joint: {trajectory: 0.4, goal: 0.4}
+      shoulder_pan_shoulder_lift_joint: {trajectory: 0.4, goal: 0.4}
+      shoulder_lift_elbow_joint: {trajectory: 0.4, goal: 0.4}
+      elbow_wrist_1_joint: {trajectory: 0.4, goal: 0.4}
+      wrist_1_wrist_2_joint: {trajectory: 0.4, goal: 0.4}
 
 gripper_controller:
   ros__parameters:
@@ -89,5 +89,4 @@ gripper_controller:
 
     constraints:
       stopped_velocity_tolerance: 0.2
-      # goal_time: 0.0
-      wrist_2_gripper_joint: { trajectory: 0.4, goal: 0.4 }
+      wrist_2_gripper_joint: {trajectory: 0.4, goal: 0.4}
