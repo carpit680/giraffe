@@ -147,11 +147,11 @@ hardware_interface::return_type ArduinoInterface::write(const rclcpp::Time & /*t
   // In a real hardware scenario, you would send position_commands_ to the controller or actuators here.
   // For now, we are just simulating.
 
-  RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Received new position commands:");
-  for (size_t i = 0; i < info_.joints.size(); ++i)
-  {
-    RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "  Joint '%s' command: %.3f", info_.joints[i].name.c_str(), position_commands_[i]);
-  }
+  // RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Received new position commands:");
+  // for (size_t i = 0; i < info_.joints.size(); ++i)
+  // {
+  //   RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "  Joint '%s' command: %.3f", info_.joints[i].name.c_str(), position_commands_[i]);
+  // }
 
   // You could send these commands to Arduino or other hardware here, if set up.
   // For debugging, we do no actual hardware write beyond logging.
@@ -169,7 +169,7 @@ hardware_interface::return_type ArduinoInterface::read(const rclcpp::Time & /*ti
   {
     double error = position_commands_[i] - position_states_[i];
     // Move the actual state a fraction of the way to the commanded position
-    position_states_[i] += error * simulation_speed_factor_ * dt;
+    position_states_[i] = position_commands_[i];
   }
 
   // Publish for debugging
@@ -184,7 +184,7 @@ hardware_interface::return_type ArduinoInterface::read(const rclcpp::Time & /*ti
 
   state_publisher_->publish(msg);
 
-  RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Updated joint states and published to 'debug_joint_states'.");
+  // RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Updated joint states and published to 'debug_joint_states'.");
 
   return hardware_interface::return_type::OK;
 }
