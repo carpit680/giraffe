@@ -13,13 +13,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include <sensor_msgs/msg/joint_state.hpp>
 
-namespace arduino_controller
+namespace giraffe_controller
 {
-ArduinoInterface::ArduinoInterface() 
+GiraffeInterface::GiraffeInterface() 
 {
 }
 
-ArduinoInterface::~ArduinoInterface()
+GiraffeInterface::~GiraffeInterface()
 {
     if (SerialPort != -1)
     {
@@ -27,7 +27,7 @@ ArduinoInterface::~ArduinoInterface()
     }
 }
 
-CallbackReturn ArduinoInterface::on_init(const hardware_interface::HardwareInfo &hardware_info)
+CallbackReturn GiraffeInterface::on_init(const hardware_interface::HardwareInfo &hardware_info)
 {
   CallbackReturn result = hardware_interface::SystemInterface::on_init(hardware_info);
   if (result != CallbackReturn::SUCCESS)
@@ -43,7 +43,7 @@ CallbackReturn ArduinoInterface::on_init(const hardware_interface::HardwareInfo 
   return CallbackReturn::SUCCESS;
 }
 
-std::vector<hardware_interface::StateInterface> ArduinoInterface::export_state_interfaces()
+std::vector<hardware_interface::StateInterface> GiraffeInterface::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
@@ -56,7 +56,7 @@ std::vector<hardware_interface::StateInterface> ArduinoInterface::export_state_i
   return state_interfaces;
 }
 
-std::vector<hardware_interface::CommandInterface> ArduinoInterface::export_command_interfaces()
+std::vector<hardware_interface::CommandInterface> GiraffeInterface::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
@@ -70,9 +70,9 @@ std::vector<hardware_interface::CommandInterface> ArduinoInterface::export_comma
   return command_interfaces;
 }
 
-CallbackReturn ArduinoInterface::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
+CallbackReturn GiraffeInterface::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Activating 5DoF arm and gripper hardware interface...");
+  RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Activating 5DoF arm and gripper hardware interface...");
 
   // Initialize positions and commands
   for (size_t i = 0; i < info_.joints.size(); ++i)
@@ -82,14 +82,14 @@ CallbackReturn ArduinoInterface::on_activate(const rclcpp_lifecycle::State & /*p
   }
 
   // Create a separate rclcpp Node for publishing joint states for debugging
-  node_ = rclcpp::Node::make_shared("arduino_hardware_interface_node");
+  node_ = rclcpp::Node::make_shared("giraffe_hardware_interface_node");
   state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("debug_joint_states", 10);
 
-  RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Hardware interface activated.");
+  RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Hardware interface activated.");
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn ArduinoInterface::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/)
+CallbackReturn GiraffeInterface::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
     if (SerialPort != -1)
     {
@@ -97,11 +97,11 @@ CallbackReturn ArduinoInterface::on_deactivate(const rclcpp_lifecycle::State & /
         close(SerialPort);
         SerialPort = -1;
     }
-    RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Hardware interface deactivated.");
+    RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Hardware interface deactivated.");
     return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-int ArduinoInterface::WriteToSerial(const unsigned char* buf, int nBytes)
+int GiraffeInterface::WriteToSerial(const unsigned char* buf, int nBytes)
 {
     if (SerialPort == -1)
     {
@@ -112,7 +112,7 @@ int ArduinoInterface::WriteToSerial(const unsigned char* buf, int nBytes)
     return ::write(SerialPort, const_cast<unsigned char*>(buf), nBytes);
 }
 
-int ArduinoInterface::ReadSerial(unsigned char* buf, int nBytes)
+int GiraffeInterface::ReadSerial(unsigned char* buf, int nBytes)
 {
     if (SerialPort == -1)
     {
@@ -143,32 +143,31 @@ int ArduinoInterface::ReadSerial(unsigned char* buf, int nBytes)
 }
 
 // Write commands to the hardware (currently just simulating)
-hardware_interface::return_type ArduinoInterface::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
+hardware_interface::return_type GiraffeInterface::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
   // In a real hardware scenario, you would send position_commands_ to the controller or actuators here.
   // For now, we are just simulating.
 
-  // RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Received new position commands:");
+  // RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Received new position commands:");
   // for (size_t i = 0; i < info_.joints.size(); ++i)
   // {
-  //   RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "  Joint '%s' command: %.3f", info_.joints[i].name.c_str(), position_commands_[i]);
+  //   RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "  Joint '%s' command: %.3f", info_.joints[i].name.c_str(), position_commands_[i]);
   // }
 
-  // You could send these commands to Arduino or other hardware here, if set up.
+  // You could send these commands to Giraffe or other hardware here, if set up.
   // For debugging, we do no actual hardware write beyond logging.
 
   return hardware_interface::return_type::OK;
 }
 
 // Read states from the hardware (simulated feedback)
-hardware_interface::return_type ArduinoInterface::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
+hardware_interface::return_type GiraffeInterface::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
   double dt = period.seconds();
 
   // Simulate the arm moving towards the commanded positions
   for (size_t i = 0; i < info_.joints.size(); ++i)
   {
-    double error = position_commands_[i] - position_states_[i];
-    // Move the actual state a fraction of the way to the commanded position
+    // Move the actual state to the commanded position
     position_states_[i] = position_commands_[i];
   }
 
@@ -184,11 +183,11 @@ hardware_interface::return_type ArduinoInterface::read(const rclcpp::Time & /*ti
 
   state_publisher_->publish(msg);
 
-  // RCLCPP_INFO(rclcpp::get_logger("ArduinoInterface"), "Updated joint states and published to 'debug_joint_states'.");
+  // RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Updated joint states and published to 'debug_joint_states'.");
 
   return hardware_interface::return_type::OK;
 }
 
-}  // namespace arduino_controller
+}  // namespace giraffe_controller
 
-PLUGINLIB_EXPORT_CLASS(arduino_controller::ArduinoInterface, hardware_interface::SystemInterface)
+PLUGINLIB_EXPORT_CLASS(giraffe_controller::GiraffeInterface, hardware_interface::SystemInterface)

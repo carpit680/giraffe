@@ -1,5 +1,5 @@
-#ifndef ARDUINO_INTERFACE_H
-#define ARDUINO_INTERFACE_H
+#ifndef GIRAFFE_INTERFACE_H
+#define GIRAFFE_INTERFACE_H
 
 #include <rclcpp/rclcpp.hpp>
 #include "rclcpp/macros.hpp"
@@ -20,16 +20,16 @@
 
 #include <sensor_msgs/msg/joint_state.hpp>
 
-namespace arduino_controller
+namespace giraffe_controller
 {
 
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-class ArduinoInterface : public hardware_interface::SystemInterface
+class GiraffeInterface : public hardware_interface::SystemInterface
 {
 public:
-  ArduinoInterface();
-  virtual ~ArduinoInterface();
+  GiraffeInterface();
+  virtual ~GiraffeInterface();
 
   // LifecycleNodeInterface
   CallbackReturn on_init(const hardware_interface::HardwareInfo &hardware_info) override;
@@ -60,6 +60,6 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr state_publisher_;
 };
 
-}  // namespace arduino_controller
+}  // namespace giraffe_controller
 
-#endif  // ARDUINO_INTERFACE_H
+#endif  // GIRAFFE_INTERFACE_H

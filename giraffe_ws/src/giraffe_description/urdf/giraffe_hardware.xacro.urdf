@@ -275,7 +275,7 @@
 
     <ros2_control name="GiraffeSystem" type="system">
         <hardware>
-            <plugin>arduino_controller/ArduinoInterface</plugin>
+            <plugin>giraffe_controller/GiraffeInterface</plugin>
         </hardware>
 
         <joint name="base_link_shoulder_pan_joint">
