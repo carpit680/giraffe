@@ -2,21 +2,18 @@
 import os
 import yaml
 import xacro
-from os import pathsep
 
-from ament_index_python.packages import get_package_share_directory, get_package_share_path, get_package_prefix
+from ament_index_python.packages import get_package_share_directory, get_package_share_path
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction, ExecuteProcess, RegisterEventHandler, AppendEnvironmentVariable
-from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution, FindExecutable
+from launch.actions import TimerAction, RegisterEventHandler
+from launch.substitutions import Command, PathJoinSubstitution, FindExecutable
 from launch.event_handlers import OnProcessExit
 
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 from moveit_configs_utils import MoveItConfigsBuilder
-
 
 
 # LOAD FILE:
