@@ -24,24 +24,7 @@ class GiraffeDriver(Node):
                 "wrist_2_gripper_joint": (6, "sts3215"),
             },
         )
-        self.motors_bus.connect()
-
-        # ROS topics
-        # self.joint_state_pub = self.create_publisher(JointState, "/joint_states", 10)
-        self.joint_command_sub = self.create_subscription(
-            JointState, "/joint_states", self.joint_state_callback, 10
-        )
-
-
-        # Timer for publishing joint states
-        self.offsets = [3.223, 3.043, 2.979, 3.152, 1.577, 4.9547]
-        self.set_motor_acceleration(10, 50)
-    
-    def joint_state_callback(self, msg: JointState):
-        """
-        Callback for processing incoming JointState messages and writing positions and velocities to servos.
-        """
-        motor_order = [
+        self.motor_order = [
             "base_link_shoulder_pan_joint",
             "shoulder_pan_shoulder_lift_joint",
             "shoulder_lift_elbow_joint",
@@ -49,7 +32,26 @@ class GiraffeDriver(Node):
             "wrist_1_wrist_2_joint",
             "wrist_2_gripper_joint",
         ]
+        self.motors_bus.connect()
 
+        # ROS topics
+        self.joint_state_pub = self.create_publisher(JointState, "/feedback", 10)
+        self.joint_command_sub = self.create_subscription(
+            JointState, "/command", self.joint_state_callback, 10
+        )
+
+
+        # Timer for publishing joint states
+        self.timer = self.create_timer(0.01, self.publish_joint_states)
+
+        # Homing offsets
+        self.offsets = [3.223, 3.043, 2.979, 3.152, 3.1415, 4.9532]
+        self.set_motor_acceleration(10, 50)
+    
+    def joint_state_callback(self, msg: JointState):
+        """
+        Callback for processing incoming JointState messages and writing positions and velocities to servos.
+        """
         positions = []
 
         homing_offsets = [-2082, -1992, -1949, -2023, -2046, -3225]
@@ -71,9 +73,22 @@ class GiraffeDriver(Node):
                 positions.append(0)
 
         # Write all positions and velocities
-        self.motors_bus.write("Goal_Position", np.array(positions), motor_order)
+        self.motors_bus.write("Goal_Position", np.array(positions), self.motor_order)
 
         # self.get_logger().info(f"Set positions: {positions}")
+
+    def publish_joint_states(self):
+        joint_state = JointState()
+        joint_state.header.stamp = self.get_clock().now().to_msg()
+        joint_state.name = self.motor_order
+        positions = self.motors_bus.read("Present_Position", self.motor_order)
+        position_radians = self.motors_bus.steps_to_radians(positions, self.motors_bus.motors[self.motor_order[0]][1])
+        for position, offset in zip(position_radians, self.offsets):
+            joint_state.position.append(-position + offset)
+        # TODO: Test velocity and effort before using them in state interface. Also add velocity and effort state interfaces to the controller.
+        # joint_state.velocity = self.motors_bus.read("Present_Speed", self.motor_order)
+        # joint_state.effort = self.motors_bus.read("Present_Load", self.motor_order)
+        self.joint_state_pub.publish(joint_state)
 
     def set_motor_acceleration(self, acceleration: int, gripper_acceleration: int):
         """Set acceleration for all motors."""

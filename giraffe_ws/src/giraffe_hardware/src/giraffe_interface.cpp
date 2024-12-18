@@ -35,7 +35,6 @@ CallbackReturn GiraffeInterface::on_init(const hardware_interface::HardwareInfo 
     return result;
   }
 
-  // We expect 6 joints based on the YAML configuration. The actual count is derived from hardware_info.
   size_t num_joints = info_.joints.size();
   position_commands_.resize(num_joints, 0.0);
   position_states_.resize(num_joints, 0.0);
@@ -47,7 +46,6 @@ std::vector<hardware_interface::StateInterface> GiraffeInterface::export_state_i
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
-  // We only need position state interfaces as per configuration
   for (size_t i = 0; i < info_.joints.size(); i++)
   {
     state_interfaces.emplace_back(info_.joints[i].name, hardware_interface::HW_IF_POSITION, &position_states_[i]);
@@ -60,7 +58,6 @@ std::vector<hardware_interface::CommandInterface> GiraffeInterface::export_comma
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
-  // Position commands
   for (size_t i = 0; i < info_.joints.size(); i++)
   {
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
@@ -72,118 +69,152 @@ std::vector<hardware_interface::CommandInterface> GiraffeInterface::export_comma
 
 CallbackReturn GiraffeInterface::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Activating 5DoF arm and gripper hardware interface...");
+  RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Activating giraffe hardware interface...");
 
-  // Initialize positions and commands
   for (size_t i = 0; i < info_.joints.size(); ++i)
   {
     position_states_[i] = 0.0;
     position_commands_[i] = 0.0;
   }
 
-  // Create a separate rclcpp Node for publishing joint states for debugging
   node_ = rclcpp::Node::make_shared("giraffe_hardware_interface_node");
-  state_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("debug_joint_states", 10);
+
+  feedback_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+    "feedback", 10, std::bind(&GiraffeInterface::feedback_callback, this, std::placeholders::_1));
+
+  command_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("command", 10);
+
+  // Create an executor and spin in a separate thread
+  executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+  executor_->add_node(node_);
+  spin_thread_ = std::thread([this]() {
+    executor_->spin();
+  });
 
   RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Hardware interface activated.");
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn GiraffeInterface::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/)
+CallbackReturn GiraffeInterface::on_deactivate(const rclcpp_lifecycle::State &)
 {
-    if (SerialPort != -1)
-    {
-        tcflush(SerialPort, TCIFLUSH);
-        close(SerialPort);
-        SerialPort = -1;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Hardware interface deactivated.");
-    return hardware_interface::CallbackReturn::SUCCESS;
+  if (executor_) {
+    executor_->cancel();
+  }
+  if (spin_thread_.joinable()) {
+    spin_thread_.join();
+  }
+  
+  RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Hardware interface deactivated.");
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-int GiraffeInterface::WriteToSerial(const unsigned char* buf, int nBytes)
-{
-    if (SerialPort == -1)
-    {
-        // Serial port not set up - simulation only
-        return nBytes; 
-    }
 
-    return ::write(SerialPort, const_cast<unsigned char*>(buf), nBytes);
+// int GiraffeInterface::WriteToSerial(const unsigned char* buf, int nBytes)
+// {
+//     if (SerialPort == -1)
+//     {
+//         // Simulation mode
+//         return nBytes; 
+//     }
+
+//     return ::write(SerialPort, const_cast<unsigned char*>(buf), nBytes);
+// }
+
+// int GiraffeInterface::ReadSerial(unsigned char* buf, int nBytes)
+// {
+//     if (SerialPort == -1)
+//     {
+//         // Simulation mode
+//         std::fill(buf, buf + nBytes, 0);
+//         return nBytes;
+//     }
+
+//     auto t_start = std::chrono::high_resolution_clock::now();
+//     int n = 0;
+//     while(n < nBytes)
+//     {
+//         int ret = ::read(SerialPort, &buf[n], 1);
+//         if(ret < 0)
+//         {
+//             return ret;
+//         }
+
+//         n += ret;
+//         auto t_end = std::chrono::high_resolution_clock::now();
+//         double elapsed_time_ms = std::chrono::duration<double, std::milli>(t_end-t_start).count();
+//         if(elapsed_time_ms > 10000)
+//         {
+//             break;
+//         }
+//     }
+//     return n;
+// }
+
+void GiraffeInterface::feedback_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
+{
+  // RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Feedback received!");
+  std::lock_guard<std::mutex> lock(feedback_mutex_);
+  last_feedback_msg_ = msg;
 }
 
-int GiraffeInterface::ReadSerial(unsigned char* buf, int nBytes)
+// In write, we publish the current commands as a JointState
+hardware_interface::return_type GiraffeInterface::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) 
 {
-    if (SerialPort == -1)
-    {
-        // No actual hardware read - simulation
-        std::fill(buf, buf + nBytes, 0);
-        return nBytes;
-    }
+  if (!command_publisher_)
+    return hardware_interface::return_type::OK;
 
-    auto t_start = std::chrono::high_resolution_clock::now();
-    int n = 0;
-    while(n < nBytes)
-    {
-        int ret = ::read(SerialPort, &buf[n], 1);
-        if(ret < 0)
-        {
-            return ret;
-        }
+  // Publish the current command to "command" topic
+  sensor_msgs::msg::JointState cmd_msg;
+  cmd_msg.header.stamp = node_->now();
 
-        n+=ret;
-        auto t_end = std::chrono::high_resolution_clock::now();
-        double elapsed_time_ms = std::chrono::duration<double, std::milli>(t_end-t_start).count();
-        if(elapsed_time_ms > 10000)
-        {
-            break;
-        }
-    }
-    return n;
-}
+  for (size_t i = 0; i < info_.joints.size(); ++i)
+  {
+    cmd_msg.name.push_back(info_.joints[i].name);
+    cmd_msg.position.push_back(position_commands_[i]);
+  }
 
-// Write commands to the hardware (currently just simulating)
-hardware_interface::return_type GiraffeInterface::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) {
-  // In a real hardware scenario, you would send position_commands_ to the controller or actuators here.
-  // For now, we are just simulating.
-
-  // RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Received new position commands:");
-  // for (size_t i = 0; i < info_.joints.size(); ++i)
-  // {
-  //   RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "  Joint '%s' command: %.3f", info_.joints[i].name.c_str(), position_commands_[i]);
-  // }
-
-  // You could send these commands to Giraffe or other hardware here, if set up.
-  // For debugging, we do no actual hardware write beyond logging.
+  command_publisher_->publish(cmd_msg);
 
   return hardware_interface::return_type::OK;
 }
 
-// Read states from the hardware (simulated feedback)
-hardware_interface::return_type GiraffeInterface::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
+// In read, we use the last received feedback message to update position_states_
+hardware_interface::return_type GiraffeInterface::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  double dt = period.seconds();
+  sensor_msgs::msg::JointState::SharedPtr feedback_copy;
 
-  // Simulate the arm moving towards the commanded positions
-  for (size_t i = 0; i < info_.joints.size(); ++i)
   {
-    // Move the actual state to the commanded position
-    position_states_[i] = position_commands_[i];
+    std::lock_guard<std::mutex> lock(feedback_mutex_);
+    feedback_copy = last_feedback_msg_;
   }
 
-  // Publish for debugging
-  sensor_msgs::msg::JointState msg;
-  msg.header.stamp = node_->now();
-  for (size_t i = 0; i < info_.joints.size(); ++i)
+  if (!feedback_copy)
   {
-    msg.name.push_back(info_.joints[i].name);
-    msg.position.push_back(position_states_[i]);
-    // If desired, you can add velocity or effort sim if needed
+    RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "No feedback received yet, no update");
+    // No feedback received yet, no update
+    return hardware_interface::return_type::OK;
   }
 
-  state_publisher_->publish(msg);
-
-  // RCLCPP_INFO(rclcpp::get_logger("GiraffeInterface"), "Updated joint states and published to 'debug_joint_states'.");
+  // Map feedback positions to our internal joint states
+  // Assuming the feedback message includes all joints in the same order as info_.joints
+  // If order or joint set differs, you'd need a matching step
+  for (size_t i = 0; i < info_.joints.size(); ++i)
+  {
+    // Log joint name and position
+    // RCLCPP_INFO_STREAM(
+    //   rclcpp::get_logger("GiraffeInterface"), "Joint " << info_.joints[i].name << " position: " << feedback_copy->position[i]
+    // ); 
+    // Find the corresponding joint in feedback
+    auto it = std::find(feedback_copy->name.begin(), feedback_copy->name.end(), info_.joints[i].name);
+    if (it != feedback_copy->name.end())
+    {
+      size_t idx = std::distance(feedback_copy->name.begin(), it);
+      if (idx < feedback_copy->position.size())
+      {
+        position_states_[i] = feedback_copy->position[idx];
+      }
+    }
+  }
 
   return hardware_interface::return_type::OK;
 }

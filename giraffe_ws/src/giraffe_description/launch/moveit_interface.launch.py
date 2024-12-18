@@ -182,6 +182,11 @@ def generate_launch_description():
         )
     )
 
+    giraffe_driver = Node(
+        package='giraffe_control',
+        executable='giraffe_driver',
+        output='screen',
+    )
     return LaunchDescription([
         control_node,
         robot_state_pub_node,
@@ -192,4 +197,5 @@ def generate_launch_description():
             period=5.0,
             actions=[run_move_group_node]
         ),
+        giraffe_driver
     ])

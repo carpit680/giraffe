@@ -47,9 +47,6 @@ private:
   std::vector<double> position_commands_;
   std::vector<double> position_states_;
 
-  // Simulated feedback parameters
-  double simulation_speed_factor_ = 0.05; // How fast actual position approaches commanded position
-
   int SerialPort = -1;
   struct termios tty;
   int WriteToSerial(const unsigned char* buf, int nBytes);
@@ -57,7 +54,17 @@ private:
 
   // ROS interfaces
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr state_publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr command_publisher_;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr feedback_subscriber_;
+
+  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
+  std::thread spin_thread_;
+
+  // Store last received feedback message
+  sensor_msgs::msg::JointState::SharedPtr last_feedback_msg_;
+  std::mutex feedback_mutex_;
+
+  void feedback_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
 };
 
 }  // namespace giraffe_controller
