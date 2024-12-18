@@ -272,14 +272,14 @@ The giraffe_moveit_config package provides the MoveIt! 2 configuration for the 5
 This package is utilized by the **giraffe_description** package's launch file to enable simulation and motion planning for the Giraffe arm in Gazebo and MoveIt! 2 environments.
 
 ### giraffe_control
+# TODO: Update this documentation
+The giraffe_control package provides hardware-level control for the 5-DoF Giraffe robotic arm. It includes a ROS 2 node, giraffe_driver, and a corresponding launch file to facilitate communication between ROS 2 and the physical hardware.
 
-The giraffe_control package provides hardware-level control for the 5-DoF Giraffe robotic arm. It includes a ROS 2 node, giraffe_hardware_interface, and a corresponding launch file to facilitate communication between ROS 2 and the physical hardware.
-
-> ℹ️ **Note:** giraffe_hardware_interface currently subscribes to joint_states from gazebo simulation to move the hardware. This is an ugly and temporary workaround and will be fixed in a couple of days.
+> ℹ️ **Note:** giraffe_driver currently subscribes to joint_states from gazebo simulation to move the hardware. This is an ugly and temporary workaround and will be fixed in a couple of days.
 
 #### Features
 
-1. Hardware Interface Node (giraffe_hardware_interface):
+1. Giraffe Servo Driver (giraffe_driver):
 
    - Implements direct communication with the Giraffe arm's servos using the Feetech motor bus.
    - Processes incoming JointState messages to set motor positions and velocities.
@@ -294,7 +294,7 @@ The giraffe_control package provides hardware-level control for the 5-DoF Giraff
      - wrist_2_gripper_joint
 
 2. Launch File:
-   - Starts the giraffe_hardware_interface node.
+   - Starts the giraffe_driver node.
    - Configures parameters for easy integration with other ROS 2 packages.
 
 _Usage_:

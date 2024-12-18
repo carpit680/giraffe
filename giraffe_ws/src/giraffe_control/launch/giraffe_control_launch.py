@@ -14,8 +14,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='giraffe_control',
-            executable='giraffe_hardware_interface',
-            name='giraffe_hardware_interface',
+            executable='giraffe_driver',
+            name='giraffe_driver',
             output='screen',
             parameters=[config],
         ),

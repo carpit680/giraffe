@@ -184,7 +184,7 @@ def generate_launch_description():
 
     hardware_interface_node = Node(
         package="giraffe_control",
-        executable="giraffe_hardware_interface",
+        executable="giraffe_driver",
         output="screen",
     )
 

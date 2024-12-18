@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'giraffe_hardware_interface = giraffe_control.giraffe_hardware_interface:main',
+            'giraffe_driver = giraffe_control.giraffe_driver:main',
         ],
     },
 )

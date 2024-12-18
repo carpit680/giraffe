@@ -6,10 +6,10 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from giraffe_control.feetech import FeetechMotorsBus
 import numpy as np
 
-class GiraffeHardwareInterface(Node):
+class GiraffeDriver(Node):
 
     def __init__(self):
-        super().__init__("giraffe_hardware_interface")
+        super().__init__("giraffe_driver")
         example_param = self.declare_parameter("example_param", "default_value").value
         self.get_logger().info(f"Declared parameter 'example_param'. Value: {example_param}")
 
@@ -103,15 +103,15 @@ class GiraffeHardwareInterface(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    giraffe_hardware_interface = GiraffeHardwareInterface()
+    giraffe_driver = GiraffeDriver()
 
     try:
-        rclpy.spin(giraffe_hardware_interface)
+        rclpy.spin(giraffe_driver)
     except KeyboardInterrupt:
         pass
 
-    giraffe_hardware_interface.destroy_node()
-    giraffe_hardware_interface.motors_bus.disconnect()
+    giraffe_driver.destroy_node()
+    giraffe_driver.motors_bus.disconnect()
     rclpy.try_shutdown()
 
 

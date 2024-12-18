@@ -93,7 +93,7 @@ def generate_launch_description():
 
     hardware_interface_node = Node(
         package="giraffe_control",
-        executable="giraffe_hardware_interface",
+        executable="giraffe_driver",
         output="screen",
     )
     rviz_base = os.path.join(get_package_share_directory("giraffe_control"), "config")
