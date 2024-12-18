@@ -1,6 +1,6 @@
 remote_theme: pages-themes/hacker@v0.2.0
 title: [giraffe]
-description: [A low-cost robotic manipulator 🦒]
+description: [A low-cost robotic manipulator]
 
 # Where things are
 source              : .
