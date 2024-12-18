@@ -77,7 +77,7 @@ CallbackReturn GiraffeInterface::on_activate(const rclcpp_lifecycle::State & /*p
     position_commands_[i] = 0.0;
   }
 
-  node_ = rclcpp::Node::make_shared("giraffe_hardware_interface_node");
+  node_ = rclcpp::Node::make_shared("giraffe_giraffe_driver");
 
   feedback_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
     "feedback", 10, std::bind(&GiraffeInterface::feedback_callback, this, std::placeholders::_1));

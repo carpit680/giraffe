@@ -91,7 +91,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    hardware_interface_node = Node(
+    giraffe_driver = Node(
         package="giraffe_control",
         executable="giraffe_driver",
         output="screen",
@@ -133,6 +133,6 @@ def generate_launch_description():
             default_value=use_sim_time,
             description='If true, use simulated clock'),
         bridge,
-        hardware_interface_node,
+        giraffe_driver,
         rviz_node_full,
     ])

@@ -272,19 +272,17 @@ The giraffe_moveit_config package provides the MoveIt! 2 configuration for the 5
 This package is utilized by the **giraffe_description** package's launch file to enable simulation and motion planning for the Giraffe arm in Gazebo and MoveIt! 2 environments.
 
 ### giraffe_control
-# TODO: Update this documentation
 The giraffe_control package provides hardware-level control for the 5-DoF Giraffe robotic arm. It includes a ROS 2 node, giraffe_driver, and a corresponding launch file to facilitate communication between ROS 2 and the physical hardware.
-
-> ℹ️ **Note:** giraffe_driver currently subscribes to joint_states from gazebo simulation to move the hardware. This is an ugly and temporary workaround and will be fixed in a couple of days.
 
 #### Features
 
 1. Giraffe Servo Driver (giraffe_driver):
 
    - Implements direct communication with the Giraffe arm's servos using the Feetech motor bus.
-   - Processes incoming JointState messages to set motor positions and velocities.
+   - Processes incoming command messages to set motor positions.
+   - Read motor position feedback from the servos to publish feedback.
    - Supports homing offsets, acceleration settings, and position conversion from radians to motor steps.
-   - Subscribes to /joint_states for joint commands.
+   - Subscribes to /command for joint commands and publishes feedback to /feedback topic.
    - Interfaces with six motors:
      - base_link_shoulder_pan_joint
      - shoulder_pan_shoulder_lift_joint
@@ -298,4 +296,23 @@ The giraffe_control package provides hardware-level control for the 5-DoF Giraff
    - Configures parameters for easy integration with other ROS 2 packages.
 
 _Usage_:
+
 The giraffe_control package is used by the giraffe_description package's launch file to provide hardware control during simulations and real-world operation. It ensures seamless integration of the Giraffe robotic arm into ROS 2 for both motion execution and feedback.
+
+### giraffe_hardware
+The giraffe_hardware package provides a ros2_control hardware interface for the Giraffe 5-DoF robotic arm plus a gripper joint. This interface lets you control and monitor the arm through standard ROS 2 controllers and topics, simplifying integration with motion planning frameworks like MoveIt.
+
+#### Features:
+
+1. Giraffe Hardware Interface (GiraffeInterface):
+   - Implements a hardware_interface::SystemInterface plugin.
+   - Subscribes to feedback (sensor_msgs/msg/JointState) for joint position updates.
+   - Publishes to command (sensor_msgs/msg/JointState) to send joint commands.
+   - Handles all six joints of the arm.
+
+_Usage_:
+
+- Integrate with controller_manager and standard controllers (e.g., joint_trajectory_controller).
+- Place giraffe_interface in your ros2_control configuration.
+- Commands and feedback are exchanged via standard ROS topics, enabling easy simulation or real hardware operation.
+
