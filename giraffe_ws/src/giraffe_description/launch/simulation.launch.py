@@ -90,7 +90,15 @@ def generate_launch_description():
         arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
         output='screen'
     )
-
+    rviz_base = os.path.join(get_package_share_directory("giraffe_description"), "config")
+    rviz_full_config = os.path.join(rviz_base, "teleop.rviz")
+    rviz_node_full = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="log",
+        arguments=["-d", rviz_full_config],
+    )
     return LaunchDescription([
         env_var,
         # Launch gazebo environment
@@ -119,4 +127,5 @@ def generate_launch_description():
             default_value=use_sim_time,
             description='If true, use simulated clock'),
         bridge,
+        rviz_node_full,
     ])
