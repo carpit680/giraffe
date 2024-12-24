@@ -1,0 +1,134 @@
+<mujoco model="giraffe">
+  <compiler angle="radian" meshdir="./giraffe_meshes/"/>
+
+  <option timestep="0.001" impratio="100" integrator="implicitfast" cone="elliptic"/>
+
+  <visual>
+    <global azimuth="150" elevation="-20" offheight="640"/>
+    <headlight ambient="0.3 0.3 0.3" diffuse="0.6 0.6 0.6" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
+
+  <statistic extent="0.6" center="0 0 0.1"/>
+
+  <default class="main">
+    <default class="giraffe">
+      <joint actuatorfrcrange="-10 10" armature="0.1" damping="1"/>
+      <site size="0.001 0.005 0.005" group="4" rgba="0.5 0.5 0.5 0.3"/>
+      <general biastype="affine" gainprm="1000" biasprm="0 -1000 -10"/>
+      <default class="visual">
+        <geom type="mesh" group="2"/>
+      </default>
+      <default class="collision">
+        <geom type="mesh" group="3"/>
+        <default class="gripper">
+          <geom condim="6" priority="1" friction="1.5" solimp="0.015 1 0.036"/>
+        </default>
+      </default>
+    </default>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="black" rgba="0.1 0.1 0.1 1"/>
+    <material name="white" rgba="0.8 0.8 0.8 1"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+
+    <mesh name="gripper" file="gripper.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="wrist_2" file="wrist_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="wrist_1" file="wrist_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="elbow" file="elbow.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="shoulder_lift" file="shoulder_lift.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="shoulder_pan" file="shoulder_pan.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="base_link" file="base_link.stl" scale="0.001 0.001 0.001"/>
+
+    <mesh name="gripper_collision" file="gripper.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="wrist_2_collision" file="wrist_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="wrist_1_collision" file="wrist_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="elbow_collision" file="elbow.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="shoulder_lift_collision" file="shoulder_lift.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="shoulder_pan_collision" file="shoulder_pan.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="base_link_collision" file="base_link.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" size="0 0 0.05" type="plane" friction="0.1" material="groundplane"/>
+    <geom name="target_region" size="0.035 0.01" pos="0.102793 0.109192 0.005" type="cylinder" contype="0" conaffinity="0" rgba="0 0 1 0.3"/>
+    <camera name="camera_front" pos="0.049 0.5 0.225" quat="0.0228997 0.0161522 0.576165 0.816853"/>
+    <camera name="camera_top" pos="0 0.1 0.6"/>
+    <camera name="camera_vizu" pos="-0.1 0.6 0.3" quat="-0.127114 -0.0847427 0.508456 0.847427"/>
+    <light pos="0 0 3" dir="0 0 -1"/>
+
+    <body name="base_link" childclass="giraffe" quat="0.707105 0 0 0.707108">
+      <geom class="visual" pos="0 0 0" quat="0.707105 0 0 0.707108" type="mesh" rgba="1 1 1 1" mesh="base_link"/>
+      <geom class="collision" pos="0 0 0" quat="0.707105 0 0 0.707108" type="mesh" mesh="base_link_collision"/>
+
+      <body name="shoulder_pan" pos="0.000132673 0.09892 0.05455" quat="0.707374 0 0 0.70684">
+        <inertial pos="0.018989 0.000179472 -0.00571101" quat="0.69328 -0.134099 -0.12915 0.696205" mass="0.250234" diaginertia="0.00016813 0.000134257 7.53191e-05"/>
+        <joint name="base_link_shoulder_pan_joint" pos="0 0 0" axis="0 0 1" range="-1.8326 1.8326"/>
+        <geom class="visual" pos="-0.0911589 0.00593084 0.0645867" quat="0.707375 0 0 -0.706839" type="mesh" rgba="0 0 0.8 1" mesh="shoulder_pan"/>
+        <geom class="collision" pos="-0.0911589 0.00593084 0.0645867" quat="0.707375 0 0 -0.706839" type="mesh" mesh="shoulder_pan_collision"/>
+
+        <body name="shoulder_lift" pos="0.0257194 0.0189447 0.0173761" quat="0.49981 0.49981 -0.50019 -0.50019">
+          <inertial pos="0.0184018 0.0676401 0.00245879" quat="0.52592 0.496227 -0.485468 0.491413" mass="0.344051" diaginertia="0.000487169 0.000468958 8.53578e-05"/>
+          <joint name="shoulder_pan_shoulder_lift_joint" pos="0 0 0" axis="-1 2.06744e-10 0.000758654" range="-0.785398 1.65806"/>
+          <geom class="visual" pos="0.0135265 0.0466367 0.116594" quat="0.707107 -0.707107 0.000268225 0.000268225" type="mesh" mesh="shoulder_lift"/>
+          <geom class="collision" pos="0.0135265 0.0466367 0.116594" quat="0.707107 -0.707107 0.000268225 0.000268225" type="mesh" mesh="shoulder_lift_collision"/>
+
+          <body name="elbow" pos="0.0378935 0.109491 -0.0251964" quat="0 1 -1.6564e-10 0">
+            <inertial pos="-0.0191099 -0.00194784 0.062378" quat="0.708777 -0.00565854 -0.0109736 0.705325" mass="0.340735" diaginertia="0.000442489 0.000417467 9.60818e-05"/>
+            <joint name="shoulder_lift_elbow_joint" pos="0 0 0" axis="1 -1.24536e-10 -3.45629e-07" range="-1.53589 1.78024"/>
+            <geom class="visual" pos="-0.0185753 0.00829169 0.00986803" quat="4.40515e-11 -4.4051e-11 -0.707107 0.707107" type="mesh" rgba="1 1 1 1" mesh="elbow"/>
+            <geom class="collision" pos="-0.0185753 0.00829169 0.00986803" quat="4.40515e-11 -4.4051e-11 -0.707107 0.707107" type="mesh" mesh="elbow_collision"/>
+
+            <body name="wrist_1" pos="-0.0376163 -0.00221579 0.12026" quat="1 0 0 -1.23824e-10">
+              <inertial pos="0.0195541 -0.0003021 0.0267688" quat="0.655112 -0.26413 -0.267553 0.655347" mass="0.115855" diaginertia="7.00665e-05 4.95009e-05 3.1834e-05"/>
+              <joint name="elbow_wrist_1_joint" pos="0 0 0" axis="-1 -1.23112e-10 0.000758346" range="-1.79769 1.79769"/>
+              <geom class="visual" pos="0.0274339 -0.0100907 0.0757" quat="2.03795e-11 -1 -6.15349e-11 0.000379327" type="mesh" rgba="0 0 0.8 1" mesh="wrist_1"/>
+              <geom class="collision" pos="0.0274339 -0.0100907 0.0757" quat="2.03795e-11 -1 -6.15349e-11 0.000379327" type="mesh" mesh="wrist_1_collision"/>
+
+              <body name="wrist_2" pos="0.0271658 -0.00019892 0.060318" quat="0.498153 -0.502218 0.501864 0.497749">
+                <inertial pos="-0.0223517 -0.000399723 -0.00128848" quat="0.396826 0.566256 0.626577 0.359562" mass="0.204797" diaginertia="0.00010478 0.00010171 4.79067e-05"/>
+                <joint name="wrist_1_wrist_2_joint" pos="0 0 0" axis="-0.999945 0.006662 -0.00813227" range="-3.14159 3.14159"/>
+                <geom class="visual" pos="-0.0213542 0.22061 -0.0208991" quat="0.00236256 0.704222 -0.00234821 0.709972" type="mesh" mesh="wrist_2"/>
+                <geom class="collision" pos="-0.0213542 0.22061 -0.0208991" quat="0.00236256 0.704222 -0.00234821 0.709972" type="mesh" mesh="wrist_2_collision"/>
+
+                <body name="gripper" pos="-0.0171717 -0.0193104 -0.0255795" quat="0.707083 -0.707119 -0.00315993 -0.00262362">
+                  <inertial pos="-0.0250961 -0.00522173 0.0186077" quat="0.428458 0.407091 0.554617 0.585748" mass="0.127948" diaginertia="4.32473e-05 2.6861e-05 2.09207e-05"/>
+                  <joint name="wrist_2_gripper_joint" pos="0 0 0" axis="-0.00742063 -0.000759 -0.999972" range="0 1.5708"/>
+                  <geom class="visual" pos="-0.003312 0.0310044 0.285467" quat="0.539791 -0.543575 0.45634 -0.452665" type="mesh" rgba="1 1 1 1" mesh="gripper"/>
+                  <geom class="collision" pos="-0.003312 0.0310044 0.285467" quat="0.539791 -0.543575 0.45634 -0.452665" type="mesh" mesh="gripper_collision"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <body name="cube" pos="0 0.2 0.01">
+      <inertial pos="0 0 0" mass="10" diaginertia="0.00016667 0.00016667 0.00016667"/>
+      <joint name="red_box_joint" type="free" limited="false" actuatorfrclimited="false"/>
+      <geom name="red_box" size="0.015 0.015 0.015" type="box" condim="4" priority="1" friction="0.5" rgba="0.5 0 0 1"/>
+    </body>
+  </worldbody>
+
+  <contact>
+    <exclude name="exclude_base_link_link_1" body1="base_link" body2="shoulder_pan"/>
+    <exclude name="exclude_shoulder_pan_shoulder_lift" body1="shoulder_pan" body2="shoulder_lift"/>
+    <exclude name="exclude_shoulder_lift_elbow" body1="shoulder_lift" body2="elbow"/>
+    <exclude name="exclude_elbow_wrist_1" body1="elbow" body2="wrist_1"/>
+    <exclude name="exclude_wrist_1_wrist_2" body1="wrist_1" body2="wrist_2"/>
+    <exclude name="exclude_wrist_2_gripper" body1="wrist_2" body2="gripper"/>
+  </contact>
+
+  <actuator>
+    <general name="base_link_shoulder_pan_joint" class="giraffe" joint="base_link_shoulder_pan_joint" ctrlrange="-1.8326 1.8326"/>
+    <general name="shoulder_pan_shoulder_lift_joint" class="giraffe" joint="shoulder_pan_shoulder_lift_joint" ctrlrange="-0.785398 1.65806"/>
+    <general name="shoulder_lift_elbow_joint" class="giraffe" joint="shoulder_lift_elbow_joint" ctrlrange="-1.53589 1.78024"/>
+    <general name="elbow_wrist_1_joint" class="giraffe" joint="elbow_wrist_1_joint" ctrlrange="-1.79769 1.79769"/>
+    <general name="wrist_1_wrist_2_joint" class="giraffe" joint="wrist_1_wrist_2_joint" ctrlrange="-3.14159 3.14159"/>
+    <general name="wrist_2_gripper_joint" class="giraffe" joint="wrist_2_gripper_joint" ctrlrange="0 1.5708"/>
+  </actuator>
+</mujoco>
