@@ -56,7 +56,7 @@ def generate_launch_description():
         [
             FindPackageShare('giraffe_description'),
             'config',
-            'giraffe_controller.yaml',
+            'giraffe_hardware.yaml',
         ]
     )
 
@@ -181,11 +181,11 @@ def generate_launch_description():
         output='screen',
     )
     return LaunchDescription([
-        control_node,
-        robot_state_pub_node,
-        joint_state_broadcaster_spawner,
-        delay_rviz_after_joint_state_broadcaster_spawner,
-        delay_motor_controller_spawner_after_joint_state_broadcaster_spawner,
+        # control_node,
+        # robot_state_pub_node,
+        # joint_state_broadcaster_spawner,
+        # delay_rviz_after_joint_state_broadcaster_spawner,
+        # delay_motor_controller_spawner_after_joint_state_broadcaster_spawner,
         # TimerAction(
         #     period=5.0,
         #     actions=[run_move_group_node]

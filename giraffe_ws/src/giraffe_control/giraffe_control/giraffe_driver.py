@@ -46,7 +46,7 @@ class GiraffeDriver(Node):
 
         # Homing offsets
         self.offsets = [3.223, 3.043, 2.979, 3.152, 3.1415, 4.9532]
-        self.set_motor_acceleration(10, 50)
+        self.set_motor_acceleration(5, 50)
     
     def joint_state_callback(self, msg: JointState):
         """

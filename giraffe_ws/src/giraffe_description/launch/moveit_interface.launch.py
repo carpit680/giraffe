@@ -56,7 +56,7 @@ def generate_launch_description():
         [
             FindPackageShare('giraffe_description'),
             'config',
-            'giraffe_controller.yaml',
+            'giraffe_hardware.yaml',
         ]
     )
 
