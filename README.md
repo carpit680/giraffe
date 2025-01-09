@@ -26,11 +26,11 @@ We redesigned the arm around cost-efficient Waveshare servos replacing Dynamixel
 - Relocated the servo driver closer to the base for cleaner design.
 - The servo mounts were redesigned to utilize the fasteners provided with the servos, minimizing the required assembly components to just the servos, 3D-printed parts, and a screwdriver.
 
-- **[Teleop Tongs](https://github.com/carpit680/teleop_tongs) Integration** (under development)
+- **[Teleop Tongs](https://github.com/carpit680/teleop_tongs) Integration**
 
   We integrated support for Teleop Tongs, another open-source project we built on top of [Dex Teleop](https://github.com/hello-robot/stretch_dex_teleop) (for the [Stretch 3](https://hello-robot.com/stretch-3-product) mobile manipulator by [Hello Robot](https://hello-robot.com/)), designed for teleoperating general-purpose robotic manipulators. This system features a 3D-printed tongs assembly equipped with multiple fiducial markers, serving as a stand-in for the end effector. This design enables intuitive and accessible control of the robotic arm.
 
-  The motivation behind this integration was to offer a cost-effective, and user-friendly alternative to a leader & follower arm setup. By using Teleop Tongs, operators can manipulate the robotic arm naturally, simplifying teleoperation for applications in education, research, and DIY robotics projects.
+  The motivation behind this integration was to offer a cost-effective, and user-friendly alternative to a leader & follower arm setup. By using Teleop Tongs, operators can manipulate the robotic arm naturally, simplifying teleoperation for applications in education, research, or DIY robotics projects.
 
 ---
 
