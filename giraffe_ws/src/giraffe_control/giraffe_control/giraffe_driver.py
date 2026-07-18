@@ -1,48 +1,72 @@
 #!/usr/bin/env python3
+import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+
 from giraffe_control.feetech import FeetechMotorsBus
-import numpy as np
+from giraffe_control.follower_config import JOINT_NAMES, load_follower_config
+
 
 class GiraffeDriver(Node):
 
     def __init__(self):
         super().__init__("giraffe_driver")
 
+        self.declare_parameter("follower_config", "")
+        config_param = self.get_parameter("follower_config").get_parameter_value().string_value
+        config_path = config_param.strip() or None
+
+        try:
+            follower, resolved_path = load_follower_config(config_path)
+        except FileNotFoundError as exc:
+            self.get_logger().fatal(str(exc))
+            raise
+
+        self.motor_order = list(JOINT_NAMES)
+        port = follower.port
+        if port == "auto":
+            port = self._autodetect_port()
+            self.get_logger().info(f"Auto-selected serial port: {port}")
+
         self.motors_bus = FeetechMotorsBus(
-            port="/dev/ttyACM0",
-            motors={
-                "shoulder_pan_actuator_shoulder_pan_joint": (1, "sts3215"),
-                "shoulder_lift_actuator_shoulder_lift_joint": (2, "sts3215"),
-                "elbow_actuator_elbow_joint": (3, "sts3215"),
-                "wrist_1_actuator_wrist_1_joint": (4, "sts3215"),
-                "wrist_2_actuator_wrist_2_joint": (5, "sts3215"),
-                "finger_actuator_gripper_joint": (6, "sts3215"),
-            },
+            port=port,
+            motors=follower.motors_for_bus(),
         )
-        self.motor_order = [
-            "shoulder_pan_actuator_shoulder_pan_joint",
-            "shoulder_lift_actuator_shoulder_lift_joint",
-            "elbow_actuator_elbow_joint",
-            "wrist_1_actuator_wrist_1_joint",
-            "wrist_2_actuator_wrist_2_joint",
-            "finger_actuator_gripper_joint",
-        ]
         self.motors_bus.connect()
 
         self.joint_reverse = {}
         self.offsets = []
+        self.range_min_steps = {}
+        self.range_max_steps = {}
         for motor_name in self.motor_order:
-            self.declare_parameter(f'joint_reverse.{motor_name}', False)
-            joint_reverse_param_value = self.get_parameter(f'joint_reverse.{motor_name}').get_parameter_value().bool_value
-            self.joint_reverse[motor_name] = joint_reverse_param_value
+            motor = follower.motors[motor_name]
+            self.declare_parameter(f"joint_reverse.{motor_name}", motor.reverse)
+            self.declare_parameter(f"joint_offset.{motor_name}", motor.offset)
+            self.joint_reverse[motor_name] = (
+                self.get_parameter(f"joint_reverse.{motor_name}")
+                .get_parameter_value()
+                .bool_value
+            )
+            self.offsets.append(
+                self.get_parameter(f"joint_offset.{motor_name}")
+                .get_parameter_value()
+                .double_value
+            )
+            self.range_min_steps[motor_name] = motor.range_min_steps
+            self.range_max_steps[motor_name] = motor.range_max_steps
 
-            self.declare_parameter(f'joint_offset.{motor_name}', 0.0)
-            joint_offset_param_value = self.get_parameter(f'joint_offset.{motor_name}').get_parameter_value().double_value
-            self.offsets.append(joint_offset_param_value)
-
-        self.get_logger().info(f'Loaded joint_reverse: {self.joint_reverse}')
+        id_summary = {
+            name: follower.motors[name].id for name in self.motor_order
+        }
+        self.get_logger().info(f"Loaded follower config: {resolved_path}")
+        self.get_logger().info(f"Port: {port}; motor IDs: {id_summary}")
+        self.get_logger().info(f"Loaded joint_reverse: {self.joint_reverse}")
+        self.get_logger().info(f"Loaded joint offsets: {dict(zip(self.motor_order, self.offsets))}")
+        self.get_logger().info(
+            f"Software ranges: "
+            f"{ {n: (self.range_min_steps[n], self.range_max_steps[n]) for n in self.motor_order} }"
+        )
 
         self.joint_state_pub = self.create_publisher(JointState, "/feedback", 10)
         self.joint_command_sub = self.create_subscription(
@@ -52,6 +76,21 @@ class GiraffeDriver(Node):
         self.timer = self.create_timer(0.01, self.publish_joint_states)
 
         self.set_motor_acceleration(20, 50)
+
+    @staticmethod
+    def _autodetect_port() -> str:
+        import serial.tools.list_ports
+
+        ports = [p.device for p in serial.tools.list_ports.comports()]
+        preferred = [p for p in ports if "ACM" in p or "USB" in p or "usbmodem" in p]
+        if preferred:
+            return preferred[0]
+        if ports:
+            return ports[0]
+        raise RuntimeError(
+            "port: auto but no serial devices found. Plug in the Waveshare driver "
+            "or set an explicit port in config/follower.yaml"
+        )
 
     def joint_state_callback(self, msg: JointState):
         positions = []
@@ -64,6 +103,12 @@ class GiraffeDriver(Node):
                     radians = -radians
                 model = self.motors_bus.motors[motor_name][1]
                 step_value = self.radians_to_steps(-radians, model) + self.radians_to_steps(offset, model)
+                lo = self.range_min_steps.get(motor_name)
+                hi = self.range_max_steps.get(motor_name)
+                if lo is not None:
+                    step_value = max(int(lo), step_value)
+                if hi is not None:
+                    step_value = min(int(hi), step_value)
                 positions.append(step_value)
             else:
                 positions.append(0)
@@ -75,7 +120,9 @@ class GiraffeDriver(Node):
         joint_state.header.stamp = self.get_clock().now().to_msg()
         joint_state.name = self.motor_order
         positions = self.motors_bus.read("Present_Position", self.motor_order)
-        position_radians = self.motors_bus.steps_to_radians(positions, self.motors_bus.motors[self.motor_order[0]][1])
+        position_radians = self.motors_bus.steps_to_radians(
+            positions, self.motors_bus.motors[self.motor_order[0]][1]
+        )
 
         for motor_name, position, offset in zip(self.motor_order, position_radians, self.offsets):
             radians = -position + offset
@@ -117,5 +164,5 @@ def main(args=None):
     rclpy.try_shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

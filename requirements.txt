@@ -1,3 +1,6 @@
 pyserial==3.5
 pyfiglet
 feetech-servo-sdk
+PyYAML>=6.0
+textual>=0.47.0
+numpy>=1.24

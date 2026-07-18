@@ -1,15 +1,12 @@
-giraffe_driver:
-  ros__parameters:
-    joint_reverse.shoulder_pan_actuator_shoulder_pan_joint: true
-    joint_reverse.shoulder_lift_actuator_shoulder_lift_joint: false
-    joint_reverse.elbow_actuator_elbow_joint: true
-    joint_reverse.wrist_1_actuator_wrist_1_joint: true
-    joint_reverse.wrist_2_actuator_wrist_2_joint: true
-    joint_reverse.finger_actuator_gripper_joint: false
+# Optional ROS parameter overrides for giraffe_driver.
+# Primary arm config (port, servo IDs, reverse, offset) lives in:
+#   <repo>/config/follower.yaml
+# Generate it with: python3 scripts/giraffe_setup.py
+#
+# To override from ROS, replace the empty map below, for example:
+#   follower_config: "/absolute/path/to/config/follower.yaml"
+#   joint_reverse.shoulder_pan_actuator_shoulder_pan_joint: true
+#   joint_offset.shoulder_pan_actuator_shoulder_pan_joint: 0.0
 
-    joint_offset.shoulder_pan_actuator_shoulder_pan_joint: 3.223
-    joint_offset.shoulder_lift_actuator_shoulder_lift_joint: 4.6138
-    joint_offset.elbow_actuator_elbow_joint: 1.4083
-    joint_offset.wrist_1_actuator_wrist_1_joint: 3.152
-    joint_offset.wrist_2_actuator_wrist_2_joint: 1.5708
-    joint_offset.finger_actuator_gripper_joint: 4.9532
+giraffe_driver:
+  ros__parameters: {}

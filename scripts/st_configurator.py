@@ -49,6 +49,11 @@ def menu_select():
         '6': 'Quit'
     }
     print()
+    print(f"{bcolors.WARNING}NOTE: For first-time bringup or reconfiguring an assembled arm,")
+    print(f"prefer: python3 scripts/giraffe_setup.py")
+    print(f"(discovers IDs, maps joints, writes config/follower.yaml — no EEPROM resets).")
+    print(f"This tool is for advanced EEPROM ID surgery only.{bcolors.ENDC}")
+    print()
     for key, value in options.items():
         print(f'{key}) {value}')
 

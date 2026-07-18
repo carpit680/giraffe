@@ -1,5 +1,6 @@
 
 import os
+from pathlib import Path
 import yaml
 import xacro
 
@@ -187,11 +188,32 @@ def generate_launch_description():
         'giraffe_control_params.yaml',
     )
 
+    giraffe_driver_params = [giraffe_driver_config]
+    follower_config = os.environ.get('GIRAFFE_FOLLOWER_CONFIG')
+    if not follower_config:
+        search_roots = [Path(__file__).resolve().parent, Path.cwd()]
+        if os.environ.get('GIRAFFE_ROOT'):
+            search_roots.insert(0, Path(os.environ['GIRAFFE_ROOT']))
+        for root in search_roots:
+            for parent in [root, *root.parents]:
+                candidate = parent / 'config' / 'follower.yaml'
+                if candidate.is_file():
+                    follower_config = str(candidate)
+                    break
+                example = parent / 'config' / 'follower.example.yaml'
+                if example.is_file():
+                    follower_config = str(example)
+                    break
+            if follower_config:
+                break
+    if follower_config:
+        giraffe_driver_params.append({'follower_config': follower_config})
+
     giraffe_driver = Node(
         package='giraffe_control',
         executable='giraffe_driver',
         output='screen',
-        parameters=[giraffe_driver_config],
+        parameters=giraffe_driver_params,
     )
     return LaunchDescription([
         control_node,

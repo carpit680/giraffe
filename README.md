@@ -158,35 +158,165 @@ The assembled arms would look something like this:
 
 ## Hardware Setup Instructions
 
-> NOTE: Configurator and the rest of the high-level software stack is presently only compatible with Python.
+> NOTE: The setup TUI and high-level Python stack require Python 3. The follower bring-up path below is the recommended way to configure an assembled arm — **no disassembly** and **no servo ID EEPROM resets** for normal use.
 
-### Clone The [giraffe](https://github.com/carpit680/giraffe) Repository
+### Follower: first-time / reconfigure (recommended)
+
+Use this for a **new machine**, a **lost `config/follower.yaml`**, or an **already-assembled** follower.
 
 ```bash
 git clone https://github.com/carpit680/giraffe.git
 cd giraffe
+python3 -m venv giraffe_env && source giraffe_env/bin/activate
+pip install -r requirements.txt && pip install .
+sudo usermod -aG dialout $USER && newgrp dialout   # once per machine
+
+# Power the follower (12V) and plug in the Waveshare USB servo driver, then:
+python3 scripts/giraffe_setup.py
 ```
 
-### Install Dependencies
+**Dry-run first (no motion / no EEPROM):**
 
 ```bash
-pip install -r requirements.txt
-pip install .
+GIRAFFE_CALIB_MODE=dry_run python3 scripts/giraffe_setup.py
 ```
 
-### Setup Permissions
+Then on hardware (default):
 
 ```bash
-sudo usermod -a -G dialout $USER
-sudo newgrp dialout
+unset GIRAFFE_CALIB_MODE
+python3 scripts/giraffe_setup.py
 ```
 
-### Setup Servo IDs
+If `config/follower.yaml` already exists, the welcome screen offers **Edit existing config** (load and jump to a section) or **Restart setup from scratch** (full wizard; later Write overwrites the file).
 
-Use the configurator script in `scripts/` directory
+Re-run `python3 scripts/giraffe_setup.py` anytime you lose the config. Do **not** disassemble or reset servo IDs unless a scan finds ID collisions or fewer than 6 servos.
+
+### Setup TUI — step order
+
+| Step | What it does |
+| --- | --- |
+| Environment | Checks Python deps, serial access, repo layout |
+| Serial port | Pick / open the Waveshare bus |
+| Scan | Read-only ping of servo IDs |
+| Safety | Torque-off with accept; move joints by hand clear of hard stops; confirm |
+| Map joints | Assign each ID → joint via small nudges |
+| Review | Confirm mapping; redo any joint without restarting |
+| Reverses | Test-move each joint; flip reverse flags if motion is wrong |
+| **Limit sweeps** | Auto soft-limit discovery (see below) |
+| **Wrist_2 + ground** | Manual wire center, soft-end probe, floor height |
+| Confirm / EEPROM | Review table → write `follower.yaml` + optional Feetech EEPROM |
+| Smoke test | Short moves; redo joints if needed |
+| Done | Next steps / ROS hints |
+
+**Keyboard:** `↑` `↓` move · `Enter` select/next · `b` / `Backspace` back · `r` restart · `q` quit.
+
+### Auto-calibration (limits, wrist_2, ground, collision)
+
+Giraffe uses a LeRobot-inspired flow: **low torque/speed**, **stall detection**, **URDF limits as priors**, then user-guided **wrist_2** (wire travel has no hard stop), then a **ground reach-down**. A precomputed **collision workspace** gates sweep motion so self-hits are not mistaken for joint endstops.
+
+#### Limit sweeps screen
+
+- Order (tip → base): gripper → wrist_1 → elbow → shoulder_lift → shoulder_pan (**wrist_2 is next screen**).
+- Before seeking limits, the arm **unfolds** slightly toward a clearer pose.
+- Each joint sweeps toward URDF upper, returns, then lower; soft limits = measured ends minus a margin (~6°).
+- **Live telemetry table:** position, velocity, load, current (and moving) for all mapped joints; the **active joint** is marked with `▶`.
+- **Start sweep** / **Stop** — sweeps run in a background worker so Stop can abort mid-motion.
+- Keep a hand on the power supply / E-stop during hardware sweeps.
+
+#### Limit vs self-collision
+
+| What happened | How it is treated |
+| --- | --- |
+| Stall near the URDF prior bound | **True soft/hard limit** |
+| Collision workspace blocks the next chunk | **Self-collision / obstacle** — that direction is **not** recorded as a hard stop |
+| Early stall while still free | Mechanical contact before the URDF prior — still treated as a **limit** |
+
+End reasons (`stall`, `prior`, `collision`, …) appear on the confirm table (`+end` / `−end` columns). Warnings (e.g. collision-gated sides) are listed under the table.
+
+Collision data lives in `config/collision_workspace.npz` (gitignored). It is built/loaded at the start of auto-cal and **rebuilt** after ground height (`floor_z`) is measured.
+
+#### Wrist_2 + ground screen
+
+1. **Accept** the torque-off / drop warning (arm goes limp).
+2. **Disable torque** on all mapped servos — support the arm with your hands.
+3. Rotate **wrist_2** by hand to **mid wire travel** (equal slack CW/CCW).
+4. Check ready → **Record wrist_2 center**.
+5. **Probe wrist_2 ends** (low-torque soft stalls / wire ends; Stop available).
+6. **Probe ground** — careful reach-down until stall; estimates `calibration.floor_z` in the base frame (works for table clamp or elevated robot mount).
+
+Zeros (`offset`) are the midpoint of each measured soft range so mid-range ≈ 0 in the driver.
+
+#### Confirm + EEPROM
+
+On **Confirm / EEPROM**:
+
+1. Review min/max steps, center, offset, and end reasons for all six joints, plus `floor_z`.
+2. Check the accept box.
+3. **Write YAML + EEPROM** — saves `config/follower.yaml` and writes Feetech **Min/Max angle** + **Offset** registers.
+4. EEPROM is **skipped** in `GIRAFFE_CALIB_MODE=dry_run`. On hardware failure for any ID, further EEPROM writes stop and YAML is not marked `eeprom_written: true`.
+
+`giraffe_driver` always applies **software** `range_min_steps` / `range_max_steps` clamps from YAML, even if EEPROM also has limits.
+
+### `config/follower.yaml` schema
+
+Template: [`config/follower.example.yaml`](config/follower.example.yaml). Your real file is **gitignored**.
+
+```yaml
+port: /dev/ttyACM0   # or "auto"
+baudrate: 1000000
+
+motors:
+  elbow_actuator_elbow_joint:   # one block per joint (see example file)
+    id: 3
+    model: sts3215
+    reverse: true
+    offset: 1.23              # zero (mid soft-range), radians
+    range_min_steps: 1200     # software (+ EEPROM) soft limits
+    range_max_steps: 2900
+    homing_offset_steps: 2048
+
+calibration:
+  floor_z: -0.02              # meters in base frame
+  mount: auto
+  method: auto_v1
+  urdf_prior: true
+  eeprom_written: true
+```
+
+Environment overrides:
+
+| Variable | Meaning |
+| --- | --- |
+| `GIRAFFE_CALIB_MODE=dry_run` | Exercise TUI without motion / EEPROM writes |
+| `GIRAFFE_CALIB_MODE=hw` | Hardware (default if unset) |
+| `GIRAFFE_FOLLOWER_CONFIG` | Path to an alternate follower YAML |
+| `GIRAFFE_ROOT` | Repo root if not detected automatically |
+
+### After setup — ROS control
+
+```bash
+cd giraffe_ws && colcon build --symlink-install
+source install/local_setup.bash   # or local_setup.zsh
+ros2 launch giraffe_control giraffe_control_launch.py
+```
+
+### Advanced: EEPROM servo ID tools
+
+Prefer `scripts/giraffe_setup.py` for mapping and calibration. For low-level **ID surgery** only (one-servo-at-a-time attach/reset when the scan shows collisions or missing IDs):
 
 ```bash
 python3 scripts/st_configurator.py
+```
+
+### Clone / install (same steps as above)
+
+```bash
+git clone https://github.com/carpit680/giraffe.git
+cd giraffe
+python3 -m venv giraffe_env && source giraffe_env/bin/activate
+pip install -r requirements.txt && pip install .
+sudo usermod -aG dialout $USER && newgrp dialout
 ```
 
 ---
@@ -321,18 +451,19 @@ The giraffe_control package provides hardware-level control for the 5-DoF Giraff
 
 1. Giraffe Servo Driver (giraffe_driver):
 
+   - Loads arm-specific port, servo IDs, reverse flags, offsets, software `range_min_steps` / `range_max_steps` clamps, and calibration metadata from `config/follower.yaml` (created by `scripts/giraffe_setup.py`).
    - Implements direct communication with the Giraffe arm's servos using the Feetech motor bus.
-   - Processes incoming command messages to set motor positions.
-   - Read motor position feedback from the servos to publish feedback.
+   - Processes incoming command messages to set motor positions (clamped to software ranges when present).
+   - Reads motor position feedback from the servos to publish feedback.
    - Supports homing offsets, acceleration settings, and position conversion from radians to motor steps.
-   - Subscribes to /command for joint commands and publishes feedback to /feedback topic.
-   - Interfaces with six motors:
-     - base_link_shoulder_pan_joint
-     - shoulder_pan_shoulder_lift_joint
-     - shoulder_lift_elbow_joint
-     - elbow_wrist_1_joint
-     - wrist_1_wrist_2_joint
-     - wrist_2_gripper_joint
+   - Subscribes to `/command` for joint commands and publishes feedback to `/feedback`.
+   - Interfaces with six motors (IDs come from follower.yaml):
+     - shoulder_pan_actuator_shoulder_pan_joint
+     - shoulder_lift_actuator_shoulder_lift_joint
+     - elbow_actuator_elbow_joint
+     - wrist_1_actuator_wrist_1_joint
+     - wrist_2_actuator_wrist_2_joint
+     - finger_actuator_gripper_joint
 
 2. Launch File:
    - Starts the giraffe_driver node.
@@ -340,7 +471,14 @@ The giraffe_control package provides hardware-level control for the 5-DoF Giraff
 
 _Usage_:
 
-The giraffe_control package is used by the giraffe_description package's launch file to provide hardware control during simulations and real-world operation. It ensures seamless integration of the Giraffe robotic arm into ROS 2 for both motion execution and feedback.
+```bash
+# After scripts/giraffe_setup.py has written config/follower.yaml:
+cd giraffe_ws && colcon build --symlink-install
+source install/local_setup.bash
+ros2 launch giraffe_control giraffe_control_launch.py
+```
+
+The giraffe_control package is also used by the giraffe_description package's launch files to provide hardware control during real-world operation alongside MoveIt / ros2_control.
 
 ### giraffe_hardware
 The giraffe_hardware package provides a ros2_control hardware interface for the Giraffe 5-DoF robotic arm plus a gripper joint. This interface lets you control and monitor the arm through standard ROS 2 controllers and topics, simplifying integration with motion planning frameworks like MoveIt.

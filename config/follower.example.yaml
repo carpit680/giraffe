@@ -1,0 +1,72 @@
+# Example follower arm config. Copy to follower.yaml (or run scripts/giraffe_setup.py).
+# Do not commit your real follower.yaml — it is arm-specific and gitignored.
+#
+# Written by: python3 scripts/giraffe_setup.py
+# Loaded by:  giraffe_driver (ROS) and the setup TUI edit flow.
+#
+# Fields filled by auto-calibration:
+#   offset              — mid soft-range zero (radians), driver convention
+#   range_min/max_steps — software clamps (+ Feetech EEPROM if you accepted Write)
+#   homing_offset_steps — center encoder steps mirrored to EEPROM Offset
+#   calibration.floor_z — ground/mount height in base frame (meters)
+#   calibration.method  — e.g. auto_v1 after the wizard
+
+port: /dev/ttyACM0  # or "auto" to pick the first ACM/USB serial device
+baudrate: 1000000
+
+motors:
+  shoulder_pan_actuator_shoulder_pan_joint:
+    id: 1
+    model: sts3215
+    reverse: true
+    offset: 0.0
+    range_min_steps: null
+    range_max_steps: null
+    homing_offset_steps: null
+  shoulder_lift_actuator_shoulder_lift_joint:
+    id: 2
+    model: sts3215
+    reverse: false
+    offset: 0.0
+    range_min_steps: null
+    range_max_steps: null
+    homing_offset_steps: null
+  elbow_actuator_elbow_joint:
+    id: 3
+    model: sts3215
+    reverse: true
+    offset: 0.0
+    range_min_steps: null
+    range_max_steps: null
+    homing_offset_steps: null
+  wrist_1_actuator_wrist_1_joint:
+    id: 4
+    model: sts3215
+    reverse: true
+    offset: 0.0
+    range_min_steps: null
+    range_max_steps: null
+    homing_offset_steps: null
+  wrist_2_actuator_wrist_2_joint:
+    id: 5
+    model: sts3215
+    reverse: true
+    offset: 0.0
+    range_min_steps: null
+    range_max_steps: null
+    homing_offset_steps: null
+  finger_actuator_gripper_joint:
+    id: 6
+    model: sts3215
+    reverse: false
+    offset: 0.0
+    range_min_steps: null
+    range_max_steps: null
+    homing_offset_steps: null
+
+calibration:
+  floor_z: null
+  mount: auto
+  method: null
+  urdf_prior: true
+  eeprom_written: false
